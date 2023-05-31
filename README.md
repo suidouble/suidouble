@@ -2,6 +2,17 @@
 
 Set of provider, package and object classes for javascript representation of Sui's smart contracts. Use same code for publishing, upgrading, integration testing, interaction with smart contracts and integration in browser dapps. Very alpha for now.
 
+- [Installation](#installation)
+- [Usage](#usage)
+-- [Connecting](#connecting)
+-- [Attaching a package](#attaching-a-package)
+-- [Interacting with smart contract](#interacting-with-smart-contract)
+- [Publishing the package](#publishing-the-package)
+- [Upgrading the package](#upgrading-the-package)
+- [Writing Sue Move intergration tests](#sui-move-integration-testing)
+- [Connecting web3 dapps to Sui](#sui-move-connect-in-browser)
+
+
 ### installation
 
 ```
