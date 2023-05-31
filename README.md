@@ -66,7 +66,7 @@ suiInBrowser.addEventListener('connected', async()=>{
 suiInBrowser.connect(adapter);
 ```
 
-Take a look at more detailed [web3 connect code](#sui-move-connect-in-browser)
+Take a look at more detailed [web3 connect code](#sui-move-connect-in-browser), sample application [source code](https://github.com/suidouble/suidouble-sample-app) or [check it online](https://suidouble-sample-app.herokuapp.com/).
 
 #### attaching a package
 
