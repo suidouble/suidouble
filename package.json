@@ -1,6 +1,6 @@
 {
   "name": "suidouble",
-  "version": "0.0.1",
+  "version": "0.0.3",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -9,6 +9,7 @@
   "author": "",
   "license": "Apache-2.0",
   "dependencies": {
-    "@mysten/sui.js": "^0.34.0"
+    "@mysten/sui.js": "^0.34.0",
+    "@wallet-standard/core": "^1.0.3"
   }
 }
