@@ -7,10 +7,15 @@ Set of provider, package and object classes for javascript representation of Sui
     - [Connecting](#connecting)
     - [Attaching a package](#attaching-a-package)
     - [Interacting with smart contract](#interacting-with-smart-contract)
+    - [SuiObject](#suiobject)
+    - [Fetching Events](#fetching-events)
+    - [Executing smart contract method](#executing-smart-contract-method)
+    - [Fetching objects](#fetching-objects)
 - [Publishing the package](#publishing-the-package)
 - [Upgrading the package](#upgrading-the-package)
 - [Writing Sue Move intergration tests](#sui-move-integration-testing)
 - [Connecting web3 dapps to Sui](#sui-move-connect-in-browser)
+- [Todo](#todo)
 
 
 ### installation
@@ -288,3 +293,10 @@ suiInBrowser.addEventListener('connected', async()=>{
 });
 
 ```
+
+### Todo
+
+- subscribe to events
+- suiobject invalidation/fetching optimization
+- better documentation
+- unit tests
