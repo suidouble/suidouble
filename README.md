@@ -96,6 +96,73 @@ await contract.isOnChain();
 
 #### interacting with smart contract
 
+##### SuiObject
+
+Everyhing in Sui is an object. So is in suidouble. SuiObject's instance class follows:
+
+```javascript
+suiObject.id; // '0x10cded4f9df05e37b44e3be2ffa9004dec77786950719fad6083694fdca45bf2' or something
+suiObject.address; // very same, '0x10cded4f9df05e37b44e3be2ffa9004dec77786950719fad6083694fdca45bf2'
+suiObject.isShared; // boolean. Is object shared (see Sui docs)
+suiObject.isImmutable; // boolean. Is object immutable (see Sui docs)
+suiObject.isDeleted;   // marked as removed from blockchain in result of Sui Move contract method call
+suiObject.type;        // full type name, with package-module prefix, '0x20cded4f9df05e37b44e3be2ffa9004dec77786950719fad6083694fdca45bf2::chat::ChatResponse'
+suiObject.typeName;    // type name with no prefixes, eg 'ChatResponse'
+suiObject.fields;      // {}, object. Fields stored on blockchain
+suiObject.display;     // display object stored on blockchain
+suiObject.localProperties;  // {} object. Any local properties you want to attach to object. No interaction with blockchain. May be helpful to store some temp data
+suiObject.isOwnedBy('0x10cded4f9df05e37b44e3be2ffa9004dec77786950719fad6083694fdca45bf2'); // is object owned by somebody or some object
+```
+
+@todo: better SuiObject documentation
+
+##### fetching events
+
+```javascript
+const events = await contract.fetchEvents('modulename', {eventTypeName: 'ChatResponseCreated', order: 'descending'});
+// events is instance of SuiPaginatedResponse. Data is stored in .data, has method to fetch next page - .nextPage();
+while (events.hasNextPage) {
+    for (const event of events.data) {
+        // event is instance of SuiEvent 
+        console.log('event', event.parsedJson); // data on blockchain
+        console.log('timestamp', event.timestampMs); // time event emited
+    }
+    await events.nextPage();
+}
+// const events = await contract.fetchEvents('modulename', {order: 'descending'}); // or all module events
+```
+
+##### executing smart contract method
+
+```javascript
+// executing method with parameters of (chat_shop: &ChatShop, metadata: vector<u8>, text: vector<u8>)
+const res = await contract.moveCall('chat', 'post', ['0x10cded4f9df05e37b44e3be2ffa9004dec77786950719fad6083694fdca45bf2', [3,24,55], 'anotherparam']);
+// or await contract.modules.chat.moveCall('methodname', ['somedata', [3,24,55], 'anotherparam']);
+    console.log(res);
+    for (const object of res.created) {
+        console.log('created', object.address, 'with type of', object.typeName); // instances of SuiObject (@todo: write documentation for it)
+    }
+    for (const object of res.mutated) {
+        console.log('mutated', object.address, 'with type of', object.typeName); 
+    }
+    for (const object of res.deleted) {
+        console.log('deleted', object.address, 'with type of', object.typeName, object.isDeleted);
+    }
+```
+
+##### fetching objects
+
+There's instance of SuiMemoryObjectStorage attached to every SuiMaster instance. Every smart contract method call adds created and mutated objects to it. You can also attach any object with it's address (id).
+
+```javascript
+contract.modules.modulename.pushObject('0x10cded4f9df05e37b44e3be2ffa9004dec77786950719fad6083694fdca45bf2');
+await contract.modules.modulename.fetchObjects(); // fetch objects fields etc
+const object = contract.modules.modulename.objectStorage.byAddress('0x10cded4f9df05e37b44e3be2ffa9004dec77786950719fad6083694fdca45bf2');
+```
+@todo: move pushing/fetching to SuiMemoryObjectStorage directly, as there's nothing package or module related?
+@todo: invalidation? No need to re-fetch all objects each time
+
+
 ### publishing the package
 
 Builds a package and publish it to blockchain. CLI thing, as it needs `execSync` to run `sui move build`. Tested on Ubuntu, works good. If you have some issues with other platforms - please feel free to let me know or post Pull Request.
