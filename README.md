@@ -4,9 +4,9 @@ Set of provider, package and object classes for javascript representation of Sui
 
 - [Installation](#installation)
 - [Usage](#usage)
--- [Connecting](#connecting)
--- [Attaching a package](#attaching-a-package)
--- [Interacting with smart contract](#interacting-with-smart-contract)
+    - [Connecting](#connecting)
+    - [Attaching a package](#attaching-a-package)
+    - [Interacting with smart contract](#interacting-with-smart-contract)
 - [Publishing the package](#publishing-the-package)
 - [Upgrading the package](#upgrading-the-package)
 - [Writing Sue Move intergration tests](#sui-move-integration-testing)
