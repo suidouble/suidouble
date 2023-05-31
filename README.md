@@ -61,6 +61,8 @@ suiInBrowser.addEventListener('connected', async()=>{
 suiInBrowser.connect(adapter);
 ```
 
+Take a look at more detailed [web3 connect code](#sui-move-connect-in-browser)
+
 #### attaching a package
 
 By default, suiMaster doesn't know of any smart contracts. There're 3 ways to attach one for interaction. 
