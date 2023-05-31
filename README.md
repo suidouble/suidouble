@@ -22,9 +22,11 @@ You can initialize it directly, if you have keypair, secret phrase and can use i
 ```javascript
 const suiMaster = new SuiMaster({
     keypair: Ed25519Keypair,
+    debug: true,    // echo testing messages to console
     provider: 'test', // 'test', 'dev', 'local', 'main' or instance of this lib's SuiLocalTestValidator, or instance of Sui's JsonRpcProvider 
 });
 const suiMaster = new SuiMaster({
+    debug: false,
     phrase: 'thrive mean two thrive mean two thrive mean two thrive mean two', // secret phrase to generate keypair
     provider: 'dev', 
 });
@@ -48,7 +50,42 @@ suiInBrowser.addEventListener('connected', async()=>{
 suiInBrowser.connect(adapter);
 ```
 
+#### attaching a package
+
+By default, suiMaster doesn't know of any smart contracts. There're 3 ways to attach one for interaction. 
+
+You can do it directly if you know contract's address (id). This is the option for browser apps and testing existing package:
+
+```javascript
+const contract = suiMaster.addPackage({
+    id: '0x20cded4f9df05e37b44e3be2ffa9004dec77786950719fad6083694fdca45bf2',
+});
+await contract.isOnChain();  
+```
+
+On node.js side, if you have Move's project with package code, you can attach it with path. This is the option for TDD and package publishing.
+
+```javascript
+const contract = suiMaster.addPackage({
+    path: '../path_to_move_project_root/',
+});
+await contract.isOnChain();  
+```
+
+Yes, it can find it's address on chain, by comparing Move's module names with package you own on chain. Works ok if you want to test upgrading or something. Also, you can attach the package only by modules names. This will work in browser too (note: you have to own this package, its UpgradeCap):
+
+```javascript
+const contract = suiMaster.addPackage({
+    modules: ['chat', 'anothermodulename'],
+});
+await contract.isOnChain();  
+```
+
+#### interacting with smart contract
+
 ### publishing the package
+
+Builds a package and publish it to blockchain. CLI thing, as it needs `execSync` to run `sui move build`. Tested on Ubuntu, works good. If you have some issues with other platforms - please feel free to let me know or post Pull Request.
 
 ```javascript
 const { SuiMaster } = require('suidouble');
@@ -68,6 +105,8 @@ console.log('published as', package.address);
 ```
 
 ### upgrading the package
+
+Same, it's for CLI as it re-builds the package.
 
 ```javascript
 const { SuiMaster } = require('suidouble');
@@ -91,6 +130,7 @@ if (!(await package.isOnChain())) { // suidouble tries to find package with need
 
 ### Sui Move Integration Testing
 
+CLI integration tests, it runs local testing node (has to be installed), build and deploy a Move package into it and run unit tests over.
 suidouble try to mimic Sui Move's testing framework:
 
 ```javascript
@@ -154,10 +194,16 @@ suiInBrowser.addEventListener('connected', async()=>{
 
     await contract.isOnChain();
 
+    const events = await contract.fetchEvents('chat', {eventTypeName: 'ChatResponseCreated', order: 'descending'});
+    for (const event of events.data) {
+        // instances of SuiEvent (@todo: write documentation for it)
+        console.log('event', event.parsedJson);
+    }
+
     const res = await contract.moveCall('chat', 'post', ['somedata', [3,24,55], 'anotherparam']);
     console.log(res);
     for (const object of res.created) {
-        console.log('created', object.address, 'with type of', object.typeName);
+        console.log('created', object.address, 'with type of', object.typeName); // instances of SuiObject (@todo: write documentation for it)
     }
 });
 
