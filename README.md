@@ -10,6 +10,8 @@ npm install suidouble --save
 
 ### usage
 
+#### connecting
+
 Main class to interact with blockchain is SuiMaster:
 
 ```javascript
@@ -37,7 +39,7 @@ const suiMasterAsUser = new SuiMaster({ as: 'user', provider: 'dev', });
 On browser side, you'd probably want to use Sui wallets extensions adapters to sign message and don't store any keypairs or secret phrases in your code. So there's SuiInBrowser class for this, which can setup suiMaster instance for you. See 'Sui Move Connect in browser' section or sample UI application's code for more details.
 ```javascript
 const { SuiInBrowser } = require('suidouble');
-const suiInBrowser = SuiInBrowser.getSingleton();
+const suiInBrowser = SuiInBrowser.getSingleton(); // you probably don't want to keep few connections, so there's singleton
 /// ...
 suiInBrowser.addEventListener('connected', async()=>{
     const connectedSuiMaster = await suiInBrowser.getSuiMaster(); // can post transactions now
