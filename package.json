@@ -1,6 +1,6 @@
 {
   "name": "suidouble",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "description": "Set of provider, package and object classes for javascript representation of Sui Move smart contracts. Use same code for publishing, upgrading, integration testing, interaction with smart contracts and integration in browser web3 dapps",
   "main": "index.js",
   "scripts": {
@@ -26,5 +26,11 @@
   },
   "devDependencies": {
     "tap": "^16.3.4"
+  },
+  "tap": {
+    "branches": 90,
+    "lines": 90,
+    "functions": 90,
+    "statements": 90
   }
 }
