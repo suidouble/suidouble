@@ -255,7 +255,7 @@ test('testing move call with coins', async t => {
     t.rejects(contract.moveCall('suidouble_chat', 'post', [chatShopObjectId, longMessageYouCanNotPostForFree, 'metadata']));
 
     // but can post with with post_pay function sending some sui to it
-    const moveCallResult = await contract.moveCall('suidouble_chat', 'post_pay', [chatShopObjectId, '<SUI>400000000000', longMessageYouCanNotPostForFree, 'metadata']);
+    const moveCallResult = await contract.moveCall('suidouble_chat', 'post_pay', [chatShopObjectId, {type: 'SUI', amount: 400000000000n}, longMessageYouCanNotPostForFree, 'metadata']);
 
     // there're at least some object created
     t.ok(moveCallResult.created.length > 0);
