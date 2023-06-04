@@ -80,7 +80,7 @@ module suidouble_chat::suidouble_chat {
     //     chat_response.text
     // }
 
-    /// Mint (post) a chatMessage object without referencing another object.
+    /// Mint (post) a ChatTopMessage object without referencing another object.
     public entry fun post(
         chat_shop: &ChatShop,
         text: vector<u8>,
@@ -115,6 +115,7 @@ module suidouble_chat::suidouble_chat {
         transfer::share_object(chat_top_message);
     }
 
+    /// Mint (post) a ChatResponse object 
     public entry fun reply(
         chat_top_message: &mut ChatTopMessage,
         text: vector<u8>,
@@ -147,6 +148,40 @@ module suidouble_chat::suidouble_chat {
         transfer::transfer(chat_response, tx_context::sender(ctx));
     }
 
+    /// Mint a lot of responses (we need this to unit test SuiPaginatedResponse faster)
+    public entry fun fill(
+        chat_top_message: &mut ChatTopMessage,
+        text: vector<u8>,
+        metadata: vector<u8>,
+        ctx: &mut TxContext,
+    ) {
+        assert!(length(&text) <= MAX_TEXT_LENGTH, ETextOverflow);
+
+        let dynamic_field_exists = dynamic_object_field::exists_(&chat_top_message.id, b"as_chat_response");
+        if (dynamic_field_exists) {
+            let top_level_chat_response = dynamic_object_field::remove<vector<u8>, ChatResponse>(&mut chat_top_message.id, b"as_chat_response");
+            transfer::transfer(top_level_chat_response, chat_top_message.author);
+        };
+
+        let i: u64 = 0;
+
+        while (i < 60) {
+            let id = object::new(ctx);
+
+            emit(ChatResponseCreated { id: object::uid_to_inner(&id), top_message_id: object::uid_to_inner(&chat_top_message.id), seq_n: chat_top_message.responses_count });
+
+            let chat_response = ChatResponse {
+                id: id,
+                chat_top_message_id: object::id(chat_top_message),
+                author: tx_context::sender(ctx),
+                text: text,
+                metadata,
+                seq_n: chat_top_message.responses_count,
+            };
+            transfer::transfer(chat_response, tx_context::sender(ctx));
+            i = i + 1;
+        };
+    }
 
 
     #[test]

@@ -211,6 +211,42 @@ test('execute contract methods', async t => {
     t.equal(responseText, 'ขอบคุณครับ, 🇺🇦');
 });
 
+test('testing paginatedResponse', async t => {
+    const chatTopMessage = contract.objectStorage.findMostRecentByTypeName('ChatTopMessage');
+    t.ok(chatTopMessage);
+
+    // fill method create a lot of responses ( check out contract's code )
+    const moveCallResult = await contract.moveCall('suidouble_chat', 'fill', [chatTopMessage.id, 'the message response', 'metadata']);
+    t.ok(moveCallResult.created.length >= 60); // it's 60 in move code, but let's keep chat flexible
+
+    const eventsResponse = await contract.fetchEvents('suidouble_chat');
+    const idsInEventsDict = {};
+    let responsesInEventsCount = 0;
+    do {
+        for (const event of eventsResponse.data) {
+            if (!idsInEventsDict[event.parsedJson.id]) {
+                idsInEventsDict[event.parsedJson.id] = true;
+                responsesInEventsCount++;
+            }
+        }
+    } while(await eventsResponse.nextPage());
+
+    t.ok(responsesInEventsCount >= 60); // it's 60 in move code, but let's keep chat flexible
+
+    // or using SuiPaginatedResponse forEach itterator:
+    const anotherEventsResponse = await contract.fetchEvents('suidouble_chat');
+    let loopsInForEach = 0;
+    const idsInLoopDict = {};
+    await anotherEventsResponse.forEach(async (event)=>{
+        if (!idsInLoopDict[event.parsedJson.id]) {
+            idsInLoopDict[event.parsedJson.id] = true;
+            loopsInForEach++;
+        }
+    });
+
+    t.ok(loopsInForEach >= 60); // it's 60 in move code, but let's keep chat flexible
+});
+
 test('stops local test node', async t => {
     SuiLocalTestValidator.stop();
 });
