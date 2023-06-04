@@ -187,6 +187,11 @@ test('execute contract methods', async t => {
     const chatTopMessage = contract.objectStorage.findMostRecentByTypeName('ChatTopMessage');
     t.ok(chatTopMessage);
 
+    const dynamicFields = await chatTopMessage.getDynamicFields();
+    // as per sample move contract design, after the thread posted, chatResponse is attached to chatTopMessage as a dynamic object field
+    // it's there till the very first response to thread is posted
+    t.ok(dynamicFields.data.length === 1);
+
     const responseTextAsBytes = [].slice.call(new TextEncoder().encode('ขอบคุณครับ, 🇺🇦')); // regular array with utf data
     const moveCallResult2 = await contract.moveCall('suidouble_chat', 'reply', [chatTopMessage.id, responseTextAsBytes, 'metadata']);
 
