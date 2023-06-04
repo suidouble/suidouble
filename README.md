@@ -155,6 +155,14 @@ const res = await contract.moveCall('chat', 'post', ['0x10cded4f9df05e37b44e3be2
     }
 ```
 
+If you need to transfer some SUI as part of executing contract method, you can use a magic parameter in form of '<SUI>400000000000' where 400000000000 is the amount of MIST you want to send. SuiPackageModule will convert this amount to Coin object using Transactions.SplitCoins method.
+
+```javascript
+const moveCallResult = await contract.moveCall('suidouble_chat', 'post_pay', [chatShopObjectId, '<SUI>400000000000', messageText, 'metadata']);
+```
+
+@todo: sending other Coins
+
 ##### fetching objects
 
 There's instance of SuiMemoryObjectStorage attached to every SuiMaster instance. Every smart contract method call adds created and mutated objects to it. You can also attach any object with it's address (id).
@@ -297,6 +305,7 @@ suiInBrowser.addEventListener('connected', async()=>{
 ### Todo
 
 - subscribe to events
+- sending other coins as contract methods execution
 - suiobject invalidation/fetching optimization
 - better documentation
-- unit tests
+- unit tests coverage to 90%+

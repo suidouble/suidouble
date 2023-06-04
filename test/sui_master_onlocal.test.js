@@ -237,7 +237,7 @@ test('testing paginatedResponse', async t => {
     const anotherEventsResponse = await contract.fetchEvents('suidouble_chat');
     let loopsInForEach = 0;
     const idsInLoopDict = {};
-    await anotherEventsResponse.forEach(async (event)=>{
+    await anotherEventsResponse.forEach(async (event)=>{ // 
         if (!idsInLoopDict[event.parsedJson.id]) {
             idsInLoopDict[event.parsedJson.id] = true;
             loopsInForEach++;
@@ -245,6 +245,48 @@ test('testing paginatedResponse', async t => {
     });
 
     t.ok(loopsInForEach >= 60); // it's 60 in move code, but let's keep chat flexible
+});
+
+test('testing move call with coins', async t => {
+    const balanceWas = await suiMaster.getBalance();
+
+    const longMessageYouCanNotPostForFree = ('message ').padEnd(500, 'test');
+    // can't post it for free (as per contract design)
+    t.rejects(contract.moveCall('suidouble_chat', 'post', [chatShopObjectId, longMessageYouCanNotPostForFree, 'metadata']));
+
+    // but can post with with post_pay function sending some sui to it
+    const moveCallResult = await contract.moveCall('suidouble_chat', 'post_pay', [chatShopObjectId, '<SUI>400000000000', longMessageYouCanNotPostForFree, 'metadata']);
+
+    // there're at least some object created
+    t.ok(moveCallResult.created.length > 0);
+
+    // by suidouble_chat contract design, ChatTopMessage is an object representing a thread,
+    // it always has at least one ChatResponse (with text of the very first message in thread)
+    let foundChatTopMessage = null;
+    let foundChatResponse = null;
+    let foundText = null;
+    moveCallResult.created.forEach((obj)=>{
+        if (obj.typeName == 'ChatTopMessage') {
+            foundChatTopMessage = true;
+        }
+        if (obj.typeName == 'ChatResponse') {
+            foundChatResponse = true;
+            foundText = obj.fields.text;
+        }
+    });
+
+    t.ok(foundChatTopMessage);
+    t.ok(foundChatResponse);
+    
+    // messageTextAsBytes = [].slice.call(new TextEncoder().encode(messageText)); // regular array with utf data
+    // suidouble_chat contract store text a bytes (easier to work with unicode things), let's convert it back to js string
+    foundText = new TextDecoder().decode(new Uint8Array(foundText));
+
+    t.equal(foundText, longMessageYouCanNotPostForFree);
+
+    const balanceNow = await suiMaster.getBalance();
+
+    t.ok( balanceNow <= (balanceWas - 400000000000n) );
 });
 
 test('stops local test node', async t => {

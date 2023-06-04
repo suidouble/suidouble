@@ -8,6 +8,7 @@ module suidouble_chat::suidouble_chat {
     use sui::dynamic_object_field::{Self};
 
     use sui::sui::SUI;
+    use sui::coin::{Self, Coin};
     use sui::balance::{Self, Balance};
     
     use std::debug;
@@ -15,10 +16,20 @@ module suidouble_chat::suidouble_chat {
     use sui::event::emit;
 
     /// Max text length.
+    const MAX_TEXT_LENGTH_FREE: u64 = 256;
     const MAX_TEXT_LENGTH: u64 = 512;
+
+    /// Min price for a long message
+    const MIN_PRICE: u64 = 100;
 
     /// Text size overflow.
     const ETextOverflow: u64 = 0;
+
+    /// Not enough funds to pay for the good in question
+    const EInsufficientFunds: u64 = 1;
+
+    /// For when supplied Coin is zero.
+    const EZeroAmount: u64 = 2;
 
     // ======== Events =========
 
@@ -87,7 +98,7 @@ module suidouble_chat::suidouble_chat {
         metadata: vector<u8>,
         ctx: &mut TxContext,
     ) {
-        assert!(length(&text) <= MAX_TEXT_LENGTH, ETextOverflow);
+        assert!(length(&text) <= MAX_TEXT_LENGTH_FREE, ETextOverflow);
         let id = object::new(ctx);
         let chat_response_id = object::new(ctx);
 
@@ -115,6 +126,49 @@ module suidouble_chat::suidouble_chat {
         transfer::share_object(chat_top_message);
     }
 
+    /// Mint (post) a ChatTopMessage object without referencing another object.
+    public entry fun post_pay(
+        chat_shop: &mut ChatShop,
+        sui: Coin<SUI>,
+        text: vector<u8>,
+        metadata: vector<u8>,
+        ctx: &mut TxContext,
+    ) {
+        assert!(length(&text) <= MAX_TEXT_LENGTH, ETextOverflow);
+        assert!(coin::value(&sui) > 0, EZeroAmount);
+        assert!(coin::value(&sui) >= MIN_PRICE, EInsufficientFunds);
+
+        let sui_balance = coin::into_balance(sui);
+        balance::join(&mut chat_shop.balance, sui_balance);
+
+        let id = object::new(ctx);
+        let chat_response_id = object::new(ctx);
+
+        emit(ChatTopMessageCreated { id: object::uid_to_inner(&id), top_response_id: object::uid_to_inner(&chat_response_id),  });
+        emit(ChatResponseCreated { id: object::uid_to_inner(&chat_response_id), top_message_id: object::uid_to_inner(&id), seq_n: 0 });
+
+        let chat_top_message = ChatTopMessage {
+            id: id,
+            chat_shop_id: object::id(chat_shop),
+            author: tx_context::sender(ctx),
+            chat_top_response_id: object::uid_to_inner(&chat_response_id),
+            responses_count: 0,
+        };
+
+        let chat_response = ChatResponse {
+            id: chat_response_id,
+            chat_top_message_id: object::id(&chat_top_message),
+            author: tx_context::sender(ctx),
+            text: text,
+            metadata,
+            seq_n: 0,
+        };
+        dynamic_object_field::add(&mut chat_top_message.id, b"as_chat_response", chat_response);
+
+        transfer::share_object(chat_top_message);
+    }
+
+
     /// Mint (post) a ChatResponse object 
     public entry fun reply(
         chat_top_message: &mut ChatTopMessage,
@@ -122,7 +176,7 @@ module suidouble_chat::suidouble_chat {
         metadata: vector<u8>,
         ctx: &mut TxContext,
     ) {
-        assert!(length(&text) <= MAX_TEXT_LENGTH, ETextOverflow);
+        assert!(length(&text) <= MAX_TEXT_LENGTH_FREE, ETextOverflow);
 
         let dynamic_field_exists = dynamic_object_field::exists_(&chat_top_message.id, b"as_chat_response");
         if (dynamic_field_exists) {
@@ -147,6 +201,45 @@ module suidouble_chat::suidouble_chat {
 
         transfer::transfer(chat_response, tx_context::sender(ctx));
     }
+
+
+    // /// Mint (post) a ChatResponse object 
+    // public entry fun reply_pay(
+    //     chat_top_message: &mut ChatTopMessage,
+    //     sui: Coin<SUI>,
+    //     text: vector<u8>,
+    //     metadata: vector<u8>,
+    //     ctx: &mut TxContext,
+    // ) acquires ChatShop {
+    //     assert!(length(&text) <= MAX_TEXT_LENGTH, ETextOverflow);
+
+    //     let dynamic_field_exists = dynamic_object_field::exists_(&chat_top_message.id, b"as_chat_response");
+    //     if (dynamic_field_exists) {
+    //         let top_level_chat_response = dynamic_object_field::remove<vector<u8>, ChatResponse>(&mut chat_top_message.id, b"as_chat_response");
+    //         transfer::transfer(top_level_chat_response, chat_top_message.author);
+    //     };
+
+    //     chat_top_message.responses_count = chat_top_message.responses_count + 1;
+        
+    //     let chat_shop = borrow_global_mut<ChatShop>(id_to_address(&chat_top_message.chat_shop_id));
+    //     let sui_balance = coin::into_balance(sui);
+    //     balance::join(&mut chat_shop.balance, sui_balance);
+
+    //     let id = object::new(ctx);
+
+    //     emit(ChatResponseCreated { id: object::uid_to_inner(&id), top_message_id: object::uid_to_inner(&chat_top_message.id), seq_n: chat_top_message.responses_count });
+
+    //     let chat_response = ChatResponse {
+    //         id: id,
+    //         chat_top_message_id: object::id(chat_top_message),
+    //         author: tx_context::sender(ctx),
+    //         text: text,
+    //         metadata,
+    //         seq_n: chat_top_message.responses_count,
+    //     };
+
+    //     transfer::transfer(chat_response, tx_context::sender(ctx));
+    // }
 
     /// Mint a lot of responses (we need this to unit test SuiPaginatedResponse faster)
     public entry fun fill(
@@ -234,6 +327,22 @@ module suidouble_chat::suidouble_chat {
 
             test_scenario::return_shared(chat_top_message);
             // test_scenario::return_to_sender(scenario, chat_top_message);
+        };
+
+        test_scenario::next_tx(scenario, anybody);
+        {    
+            let chat_shop = test_scenario::take_shared<ChatShop>(scenario);
+            debug::print(&chat_shop);
+
+            // let chat_shop_ref = &chat_shop;
+            let ctx = test_scenario::ctx(scenario);
+            post_pay(&mut chat_shop, coin::mint_for_testing<SUI>(100, ctx), b"test", b"metadata", test_scenario::ctx(scenario));
+
+            // post(chat_shop_ref, b"test", b"metadata", test_scenario::ctx(scenario));
+
+            debug::print(&chat_shop);
+
+            test_scenario::return_shared(chat_shop);
         };
 
         test_scenario::next_tx(scenario, anybody);
