@@ -16,7 +16,7 @@ let contractAddressV2 = null;
 let chatShopObjectId = null;
 
 test('spawn local test node', async t => {
-    suiLocalTestValidator = await SuiLocalTestValidator.launch();
+    suiLocalTestValidator = await SuiLocalTestValidator.launch({ testFallbackEnabled: true });
     t.ok(suiLocalTestValidator.active);
 
     // SuiLocalTestValidator runs as signle instance. So you can't start it twice with static method
@@ -25,7 +25,7 @@ test('spawn local test node', async t => {
 });
 
 test('init suiMaster and connect it to local test validator', async t => {
-    suiMaster = new SuiMaster({provider: suiLocalTestValidator, as: 'somebody'});
+    suiMaster = new SuiMaster({provider: suiLocalTestValidator, as: 'somebody', debug: false});
     await suiMaster.initialize();
 
     t.ok(suiMaster.address); // there should be some address
