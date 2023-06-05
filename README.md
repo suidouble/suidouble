@@ -17,6 +17,7 @@ Set of provider, package and object classes for javascript representation of Sui
 - [Connecting web3 dapps to Sui](#sui-move-connect-in-browser)
 - [Todo](#todo)
 
+Also take a look at sample Vue dapp application [source code](https://github.com/suidouble/suidouble-sample-app) or [check it online](https://suidouble-sample-app.herokuapp.com/).
 
 ### installation
 
