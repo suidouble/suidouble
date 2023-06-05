@@ -305,6 +305,15 @@ suiInBrowser.addEventListener('connected', async()=>{
 
 ```
 
+### Unit tests
+
+```bash
+npm install
+npm run tests
+```
+
+Take a look at [unit tests](test) code for some inspiration.
+
 ### Todo
 
 - subscribe to events
