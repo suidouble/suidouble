@@ -25,7 +25,7 @@ test('spawn local test node', async t => {
 });
 
 test('init suiMaster and connect it to local test validator', async t => {
-    suiMaster = new SuiMaster({provider: suiLocalTestValidator, as: 'somebody', debug: false});
+    suiMaster = new SuiMaster({provider: suiLocalTestValidator, as: 'somebody', debug: true});
     await suiMaster.initialize();
 
     t.ok(suiMaster.address); // there should be some address
@@ -148,6 +148,34 @@ test('can find a package on the blockchain by expected module name (in owned)', 
 
     // it should find most recent version of the package
     t.equal(contract.version, 2);
+});
+
+test('subscribe to module events', async t => {
+    const module = await contract.getModule('suidouble_chat');
+    await module.subscribeEvents();
+
+    let gotEventChatTopMessageCreated = false;
+    let gotEventChatResponseCreated = false;
+
+    module.addEventListener('ChatTopMessageCreated', (event)=>{
+        gotEventChatTopMessageCreated = event;
+    });
+    module.addEventListener('ChatResponseCreated', (event)=>{
+        gotEventChatResponseCreated = event.detail; // .detail is reference to event itself. To support CustomEvent pattern
+    });
+
+    await contract.moveCall('suidouble_chat', 'post', [chatShopObjectId, 'the message', 'metadata']);
+    await new Promise((res)=>setTimeout(res, 300)); // got events without timeout, but just to be sure.
+
+    t.ok(gotEventChatTopMessageCreated);
+    t.ok(gotEventChatResponseCreated);
+
+    // just some checks that events have data by contract's architecture
+    t.ok(gotEventChatResponseCreated.parsedJson.top_message_id == gotEventChatTopMessageCreated.parsedJson.id);
+    t.ok(gotEventChatTopMessageCreated.parsedJson.top_response_id == gotEventChatResponseCreated.parsedJson.id);
+
+    // unsubscribing from events, to close websocket
+    await module.unsubscribeEvents();
 });
 
 test('execute contract methods', async t => {
@@ -290,5 +318,5 @@ test('testing move call with coins', async t => {
 });
 
 test('stops local test node', async t => {
-    SuiLocalTestValidator.stop();
+    await SuiLocalTestValidator.stop();
 });

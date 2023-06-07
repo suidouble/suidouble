@@ -9,6 +9,7 @@ Set of provider, package and object classes for javascript representation of Sui
     - [Interacting with smart contract](#interacting-with-smart-contract)
     - [SuiObject](#suiobject)
     - [Fetching Events](#fetching-events)
+    - [Subscribe to Events](#subscribing-to-events)
     - [Executing smart contract method](#executing-smart-contract-method)
     - [Fetching objects](#fetching-objects)
 - [Publishing the package](#publishing-the-package)
@@ -136,6 +137,35 @@ while (events.hasNextPage) {
     await events.nextPage();
 }
 // const events = await contract.fetchEvents('modulename', {order: 'descending'}); // or all module events
+```
+
+##### subscribing to events
+
+You can subscribe to Sui's contract events on package's module level. No types-etc filters for now ( @todo? )
+
+```javascript
+const module = await contract.getModule('suidouble_chat');
+await module.subscribeEvents();
+module.addEventListener('ChatResponseCreated', (suiEvent)=>{
+    // received message emited by 
+    // emit(ChatResponseCreated { id: object::uid_to_inner(&chat_response_id), top_message_id: object::uid_to_inner(&id), seq_n: 0 });
+    // in suidouble_chat 's smart contract
+    console.log(suiEvent.typeName); // == 'ChatResponseCreated'
+    console.log(suiEvent.parsedJson);
+});
+module.addEventListener('ChatTopMessageCreated', (suiEvent)=>{
+    // received message emited by 
+    // emit(ChatTopMessageCreated { id: object::uid_to_inner(&id), top_response_id: object::uid_to_inner(&chat_response_id),  });
+    // in suidouble_chat 's smart contract
+    console.log(suiEvent.typeName); // == 'ChatTopMessageCreated'
+    console.log(suiEvent.parsedJson);
+});
+```
+
+Don't forget to unsubscribe from events when you don't need them anymore:
+
+```javascript
+await module.unsubscribeEvents();
 ```
 
 ##### executing smart contract method
