@@ -23,9 +23,7 @@ Set of provider, package and object classes for javascript representation of Sui
 | Name     |      Stack    |  Online | Github |
 |----------|---------------|---------|--------|
 | suidouble-sample-app |  Vue + suidouble | [suidouble-sample-app](https://suidouble-sample-app.herokuapp.com/)  | [source code](https://github.com/suidouble/suidouble-sample-app) |
-| suidouble-color |  Vue + suidouble | [suidouble-color](https://suidouble-color.herokuapp.com/)  | [source code](https://github.com/suidouble/suidouble-sample-app) |
-
-Also take a look at sample Vue dapp application [source code](https://github.com/suidouble/suidouble-sample-app) or [check it online](https://suidouble-sample-app.herokuapp.com/).
+| suidouble-color |  Vue + suidouble | [suidouble-color](https://suidouble-color.herokuapp.com/)  | [source code](https://github.com/suidouble/suidouble-sample-color) |
 
 ### installation
 
