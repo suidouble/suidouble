@@ -124,6 +124,11 @@ suiObject.fields;      // {}, object. Fields stored on blockchain
 suiObject.display;     // display object stored on blockchain
 suiObject.localProperties;  // {} object. Any local properties you want to attach to object. No interaction with blockchain. May be helpful to store some temp data
 suiObject.isOwnedBy('0x10cded4f9df05e37b44e3be2ffa9004dec77786950719fad6083694fdca45bf2'); // is object owned by somebody or some object
+/// past versions:
+await suiObject.getPastObject(version); // get instance of object from the past
+await suiObject.getPastObject(); // try to get previous
+/// object-related transactions:
+await suiObject.queryTransactionBlocks(); // returns instance of SuiPaginatedResponse
 ```
 
 @todo: better SuiObject documentation
