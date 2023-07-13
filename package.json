@@ -1,6 +1,6 @@
 {
   "name": "suidouble",
-  "version": "0.0.28",
+  "version": "0.0.29",
   "description": "Set of provider, package and object classes for javascript representation of Sui Move smart contracts. Use same code for publishing, upgrading, integration testing, interaction with smart contracts and integration in browser web3 dapps",
   "main": "index.js",
   "scripts": {
@@ -21,7 +21,7 @@
   "author": "Jeka Kiselyov <jeka911@gmail.com> (https://github.com/jeka-kiselyov)",
   "license": "Apache-2.0",
   "dependencies": {
-    "@mysten/sui.js": "^0.35.1",
+    "@mysten/sui.js": "^0.37.1",
     "@wallet-standard/core": "^1.0.3"
   },
   "devDependencies": {
