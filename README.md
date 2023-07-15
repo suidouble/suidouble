@@ -53,6 +53,12 @@ const suiMaster = new SuiMaster({
     phrase: 'thrive mean two thrive mean two thrive mean two thrive mean two', // secret phrase to generate keypair
     provider: 'dev', 
 });
+const suiMaster = new SuiMaster({
+    debug: false,
+    phrase: 'thrive mean two thrive mean two thrive mean two thrive mean two', // secret phrase to generate keypair
+    accountIndex: 1, // derive path index (you can generate few addresses with same seed phrase)
+    provider: 'dev', 
+});
 ```
 
 Also, there's option to generate pseudo-random phrases and wallets from strings, works like a charm for testing:

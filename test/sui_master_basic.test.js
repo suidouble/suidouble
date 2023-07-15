@@ -39,6 +39,22 @@ test('pseudo-random keypairs generation works ok', async t => {
     t.equal(`${suiMasterAsAdminAnother.address}`, `${suiMasterAsAdmin.address}`, 'same string should generate same pseudo-random');
 });
 
+test('keypair generation with seed phrase works ok', async t => {
+    // Ed25519
+    const phrase = 'seek weekend run rival noodle dog alone mosquito decide hover aerobic fiction'; // 0x2bfe9c35ca9400c42e24e4b424cbd2dfb51bcb7c2487e1b4694ff53d8ca00262
+    const suiMaster = new SuiMaster({provider: 'test', phrase: phrase});
+    await suiMaster.initialize();
+
+    t.equal(`${suiMaster.address}`, `0x2bfe9c35ca9400c42e24e4b424cbd2dfb51bcb7c2487e1b4694ff53d8ca00262`, 'Ed25519 generated ok');
+
+    const suiMasterNextAccount = new SuiMaster({provider: 'test', phrase: phrase, accountIndex: 1}); // default = 0
+    await suiMasterNextAccount.initialize();
+
+    t.notEqual(`${suiMaster.address}`, `${suiMasterNextAccount.address}`);
+
+    t.equal(`${suiMasterNextAccount.address}`, `0xa6fb5c51b751e07a3e3b3af1f40f3115004702aad5a96263ff0be9078195f43b`, 'Ed25519 next account generated ok');
+});
+
 test('connecting to different chains', async t => {
     const suiMaster = new SuiMaster({provider: 'test', as: 'somebody'});
     await suiMaster.initialize();
