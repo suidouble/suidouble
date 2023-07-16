@@ -8,4 +8,5 @@ module.exports = {
     SuiInBrowser,
     SuiTestScenario,
     SuiLocalTestValidator,
+    MIST_PER_SUI: SuiMaster.MIST_PER_SUI,
 };

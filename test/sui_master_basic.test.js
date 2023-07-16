@@ -3,7 +3,7 @@
 const t = require('tap');
 const { test } = t;
 
-const { SuiMaster } = require('..');
+const { SuiMaster, MIST_PER_SUI } = require('..');
 
 test('initialization', async t => {
 	t.plan(2);
@@ -62,6 +62,10 @@ test('SuiMaster has MIST_PER_SUI property available as BigInt', async t => {
 
     t.equal(typeof suiMaster.MIST_PER_SUI, 'bigint');
     t.ok(suiMaster.MIST_PER_SUI > BigInt(0));
+
+
+    t.equal(suiMaster.MIST_PER_SUI, SuiMaster.MIST_PER_SUI);
+    t.equal(suiMaster.MIST_PER_SUI, MIST_PER_SUI); // available as global library export too
 });
 
 test('connecting to different chains', async t => {
