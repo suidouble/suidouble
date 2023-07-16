@@ -55,6 +55,15 @@ test('keypair generation with seed phrase works ok', async t => {
     t.equal(`${suiMasterNextAccount.address}`, `0xa6fb5c51b751e07a3e3b3af1f40f3115004702aad5a96263ff0be9078195f43b`, 'Ed25519 next account generated ok');
 });
 
+test('SuiMaster has MIST_PER_SUI property available as BigInt', async t => {
+    const suiMaster = new SuiMaster({provider: 'test', as: 'somebody'});
+
+    t.ok(suiMaster.MIST_PER_SUI);
+
+    t.equal(typeof suiMaster.MIST_PER_SUI, 'bigint');
+    t.ok(suiMaster.MIST_PER_SUI > BigInt(0));
+});
+
 test('connecting to different chains', async t => {
     const suiMaster = new SuiMaster({provider: 'test', as: 'somebody'});
     await suiMaster.initialize();
