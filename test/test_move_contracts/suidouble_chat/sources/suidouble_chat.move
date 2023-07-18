@@ -201,6 +201,12 @@ module suidouble_chat::suidouble_chat {
 
         transfer::transfer(chat_response, tx_context::sender(ctx));
     }
+    
+    /// Permanently delete `ChatResponse`
+    public entry fun burn_response(chat_response: ChatResponse, _: &mut TxContext) {
+        let ChatResponse { id, chat_top_message_id: _, author: _, text: _, metadata: _, seq_n: _ } = chat_response;
+        object::delete(id)
+    }
 
 
     // /// Mint (post) a ChatResponse object 

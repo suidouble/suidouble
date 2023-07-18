@@ -15,6 +15,8 @@ let contractAddressV2 = null;
 
 let chatShopObjectId = null;
 
+let chatResponseToDelete = null;
+
 test('spawn local test node', async t => {
     suiLocalTestValidator = await SuiLocalTestValidator.launch({ testFallbackEnabled: true });
     t.ok(suiLocalTestValidator.active);
@@ -230,6 +232,8 @@ test('execute contract methods', async t => {
     moveCallResult2.created.forEach((obj)=>{
         if (obj.typeName == 'ChatResponse') {
             responseText = obj.fields.text;
+
+            chatResponseToDelete = obj.id; // ChatResponse is moved to be owned by author, so we can store id to try burn_response later
         }
     });
     // messageTextAsBytes = [].slice.call(new TextEncoder().encode(messageText)); // regular array with utf data
@@ -275,6 +279,7 @@ test('testing paginatedResponse', async t => {
     t.ok(loopsInForEach >= 60); // it's 60 in move code, but let's keep chat flexible
 });
 
+
 test('testing move call with coins', async t => {
     const balanceWas = await suiMaster.getBalance();
 
@@ -315,6 +320,20 @@ test('testing move call with coins', async t => {
     const balanceNow = await suiMaster.getBalance();
 
     t.ok( balanceNow <= (balanceWas - 400000000000n) );
+});
+
+test('testing move call deleting object', async t => {
+
+    console.error('chatResponseToDelete', chatResponseToDelete);
+
+    const moveCallResult = await contract.moveCall('suidouble_chat', 'burn_response', [chatResponseToDelete]);
+
+    // there're at least some object created
+    t.ok(moveCallResult.deleted.length > 0);
+
+    t.equal(moveCallResult.deleted[0].id, chatResponseToDelete);
+
+    t.ok(moveCallResult.deleted[0].isDeleted);
 });
 
 test('stops local test node', async t => {
