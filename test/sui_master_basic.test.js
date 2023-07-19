@@ -89,21 +89,3 @@ test('connecting to different chains', async t => {
 
     t.equal(suiMaster4.connectedChain, 'sui:localnet');
 });
-
-// test('get transactions', async t => {
-//     const suiMaster = new SuiMaster({provider: 'main', as: 'somebody'});
-//     await suiMaster.initialize();
-
-//     const paginatedResponse = await suiMaster.fetchTransactions({
-//             fromOrToAddress: '0xffc5bc3732f201892df5d2839b86957abcf42dfe66dc79383fe107f6548bc2bf',
-//         });
-
-//     await paginatedResponse.forEach((suiTransaction)=>{
-//         // console.log(suiTransaction.results);
-//         const objects = suiTransaction.results.objects;
-//         for (const o of objects) {
-//             // console.log(o.id, o.typeName, o.version);
-//         }
-//     }, 10);
-
-// });
