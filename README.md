@@ -22,8 +22,11 @@ Set of provider, package and object classes for javascript representation of Sui
 
 | Name     |      Stack    |  Online | Github |
 |----------|---------------|---------|--------|
+| sui-bot-score |  Vue + suidouble | [sui-bot-score](https://sui-bot-score-04f61376a410.herokuapp.com/)  | [source code](https://github.com/suidouble/suidouble-bot-score) |
 | suidouble-sample-app |  Vue + suidouble | [suidouble-sample-app](https://suidouble-sample-app.herokuapp.com/)  | [source code](https://github.com/suidouble/suidouble-sample-app) |
 | suidouble-color |  Vue + suidouble | [suidouble-color](https://suidouble-color.herokuapp.com/)  | [source code](https://github.com/suidouble/suidouble-sample-color) |
+
+
 
 ### installation
 
@@ -308,6 +311,10 @@ await testScenario.end();
 ```
 
 ### Sui Move Connect in browser
+
+Check out [suidouble Vue component](https://www.npmjs.com/package/vue-sui) to connect your dapp to the Sui blockchain.
+
+Or write the one manually, code is framework independed:
 
 ```javascript
 const { SuiInBrowser } = require('suidouble');
