@@ -21,7 +21,7 @@
   "author": "Jeka Kiselyov <jeka911@gmail.com> (https://github.com/jeka-kiselyov)",
   "license": "Apache-2.0",
   "dependencies": {
-    "@mysten/sui.js": "^0.37.1",
+    "@mysten/sui.js": "^0.39.0",
     "@wallet-standard/core": "^1.0.3"
   },
   "devDependencies": {
