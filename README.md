@@ -205,15 +205,65 @@ const res = await contract.moveCall('chat', 'post', ['0x10cded4f9df05e37b44e3be2
     }
 ```
 
-If you need to transfer some SUI as part of executing contract method, you can use a magic parameter in form of {type: 'SUI', amount: 400000000000n} where 400000000000 is the amount of MIST you want to send. SuiPackageModule will convert this amount to Coin object using Transactions.SplitCoins method.
+##### sending sui / coins with smart contract methods
 
-`amount: 400000000000n`, `amount: '400000000000'`, `amount: 400000000000` will work too
+If you need to transfer some SUI/coins as part of executing contract method, you can use a magic parameter in form of:
 
 ```javascript
-const moveCallResult = await contract.moveCall('suidouble_chat', 'post_pay', [chatShopObjectId, {type: 'SUI', amount: 400000000000n}, messageText, 'metadata']);
+{type: 'SUI', amount: 400000000000n} 
+// 400000000000 MISTs, if amount is BigInt, it's used in decimal items
+{type: 'SUI', amount: '0.2'}         
+// 0.2 SUI           , if amount is String, it's translated to decimals, using coin metadata in a lazy way
+{type: '0x5d4b302506645c37ff133b98c4b50a5ae14841659738d6d733d59d0d217a93bf::coin::COIN', amount: '1'}
+// 1 USDC
+{type: '0xc060006111016b8a020ad5b33834984a437aaa7d3c74c18e09a95d48aceab08c::coin::COIN', amount: '99.99'}
+// 99.99 USDT
 ```
 
-@todo: sending other Coins
+So executing
+
+```javascript
+const params = [
+    chatShopObjectId,
+    {type: '0xc060006111016b8a020ad5b33834984a437aaa7d3c74c18e09a95d48aceab08c::coin::COIN', amount: '9.99'},
+    messageText,
+];
+const moveCallResult = await contract.moveCall('suidouble_chat', 'post_pay', params);
+```
+
+will send 9.99 USDT as the second parameter of the package method. Suidouble will convert needed coins using Sui's SplitCoins and MergeCoins internally to match amount you expect to send.
+
+Some smart contracts requires clients to send coins in form of vectors. This is covered too, just pass magic parameter if the form of an array with one element:
+
+```javascript
+const params = [
+    chatShopObjectId,
+    [{type: '0xc060006111016b8a020ad5b33834984a437aaa7d3c74c18e09a95d48aceab08c::coin::COIN', amount: '9.99'}],
+    messageText,
+];
+```
+
+Don't forget to test transactions sending real money on devnet/testnet first!
+
+
+##### composing transaction block yourself
+
+If you need more flexebility, there's always an option to construct the transaction block yourself:
+
+```javascript
+const { TransactionBlock, Transactions } = require('suidobule'); // this exposes classes from the "@mysten/sui.js", so you don't have to import them separately
+
+const txb = new TransactionBlock();
+txb.moveCall({
+    target: `package_id::module_id::method_name`,
+    arguments: [
+        txb.pure(something),
+        txb.object(someid),
+    ],
+});
+const moveCallResult = await contract.moveCall('suidouble_chat', 'post_pay', {tx: txb});
+```
+
 
 ##### fetching objects
 
@@ -369,8 +419,6 @@ Take a look at [unit tests](test) code for some inspiration.
 
 ### Todo
 
-- subscribe to events
-- sending other coins as contract methods execution
 - suiobject invalidation/fetching optimization
 - better documentation
 - unit tests coverage to 90%+
