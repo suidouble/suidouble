@@ -216,8 +216,8 @@ If you need to transfer some SUI/coins as part of executing contract method, you
 // 400000000000 MISTs, if amount is BigInt, it's used in decimal items
 {type: 'SUI', amount: '0.2'}         
 // 0.2 SUI           , if amount is String, it's translated to decimals, using coin metadata in a lazy way
-{type: '0x5d4b302506645c37ff133b98c4b50a5ae14841659738d6d733d59d0d217a93bf::coin::COIN', amount: '1'}
-// 1 USDC
+{type: '0x5d4b302506645c37ff133b98c4b50a5ae14841659738d6d733d59d0d217a93bf::coin::COIN', amount: '1.0'}
+// 1 USDC, note it should have a dot even if it's '0' after. You may want to use `Number(var).toFixed(decimals)` as a conversion
 {type: '0xc060006111016b8a020ad5b33834984a437aaa7d3c74c18e09a95d48aceab08c::coin::COIN', amount: '99.99'}
 // 99.99 USDT
 ```
