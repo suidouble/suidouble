@@ -276,6 +276,19 @@ contract.modules.modulename.pushObject('0x10cded4f9df05e37b44e3be2ffa9004dec7778
 await contract.modules.modulename.fetchObjects(); // fetch objects fields etc
 const object = contract.modules.modulename.objectStorage.byAddress('0x10cded4f9df05e37b44e3be2ffa9004dec77786950719fad6083694fdca45bf2');
 ```
+
+Another option (if you don't know the object id) is to query current wallet owned module's objects from blockchain:
+
+```javascript
+const module = await contract.getModule('suidouble_chat');
+const paginatedResponse = await module.getOwnedObjects();   // all module objects owned by you
+const paginatedResponse2 = await module.getOwnedObjects({ typeName: 'ChatResponse' });  // specific type objects owned by you
+
+await paginatedResponse.forEach(async(suiObject)=>{
+    console.log(suiObject.id, suiObject.typeName, suiObject.fields);
+}, maxLimit); // optional maxLimit, if (!maxLimit) - it will fetch and call callback for all available objects
+```
+
 @todo: move pushing/fetching to SuiMemoryObjectStorage directly, as there's nothing package or module related?
 @todo: invalidation? No need to re-fetch all objects each time
 

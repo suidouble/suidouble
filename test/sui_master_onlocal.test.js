@@ -280,6 +280,40 @@ test('testing paginatedResponse', async t => {
 });
 
 
+test('find owned module objects with query', async t => {
+    const module = await contract.getModule('suidouble_chat');
+    const paginatedResponse = await module.getOwnedObjects();
+
+    let foundCount = 0;
+    let foundChatOwnerCap = false;
+    // loop through all module objects owned by current wall
+    await paginatedResponse.forEach((suiObject)=>{
+        if (suiObject.typeName == 'ChatOwnerCap') {
+            foundChatOwnerCap = true;
+        }
+
+        foundCount++; // total count
+    });
+    t.ok(foundCount >= 60); // it's 60 in move code, but let's keep chat flexible
+    t.ok(foundChatOwnerCap); // it's 60 in move code, but let's keep chat flexible
+
+    /// also lets try querying specific typeName
+    const paginatedResponse2 = await module.getOwnedObjects({ typeName: 'ChatOwnerCap' });
+
+    let foundCount2 = 0;
+    let foundChatOwnerCap2 = false;
+
+    await paginatedResponse2.forEach(async(suiObject)=>{  // paginatedResponse forEach also accepts async callbacks
+        if (suiObject.typeName == 'ChatOwnerCap') {
+            foundChatOwnerCap2 = true;
+        }
+        foundCount2++;
+    });
+
+    t.ok(foundChatOwnerCap2); 
+    t.ok(foundCount2 == 1); // ChatOwnerCap only
+});
+
 test('testing move call with coins', async t => {
     const balanceWas = await suiMaster.getBalance();
 
