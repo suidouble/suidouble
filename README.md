@@ -321,7 +321,7 @@ Same, it's for CLI as it re-builds the package.
 ```javascript
 const { SuiMaster } = require('suidouble');
 
-const provider = 'local';// or await SuiLocalTestValidator.launch({debug: true});
+const provider = 'local';// or await SuiLocalTestValidator.launch({debug: true, epochDuration: 30000});
 
 const suiMaster = new SuiMaster({ debug: true, as: 'admin', provider: provider, });
 await suiMaster.requestSuiFromFaucet();
