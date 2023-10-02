@@ -49,7 +49,7 @@ const { SuiMaster } = require('suidouble');
 You can initialize it directly, if you have keypair, secret phrase and can use it in code (so on node.js side - server side or CLI apps):
 ```javascript
 const suiMaster = new SuiMaster({
-    keypair: Ed25519Keypair,
+    keypair: Ed25519Keypair || Secp256r1Keypair || Secp256k1Keypair,
     debug: true,    // echo testing messages to console
     provider: 'test', // 'test', 'dev', 'local', 'main' or instance of this lib's SuiLocalTestValidator, or instance of Sui's JsonRpcProvider 
 });
@@ -62,6 +62,12 @@ const suiMaster = new SuiMaster({
     debug: false,
     phrase: 'thrive mean two thrive mean two thrive mean two thrive mean two', // secret phrase to generate keypair
     accountIndex: 1, // derive path index (you can generate few addresses with same seed phrase)
+    provider: 'dev', 
+});
+const suiMaster = new SuiMaster({
+    debug: false,
+    phrase: 'thrive mean two thrive mean two thrive mean two thrive mean two', // secret phrase to generate keypair
+    keypairAlgo: 'secp256k1', // 'secp256r1' or 'secp256r1' or 'ed25519' default is ed25519
     provider: 'dev', 
 });
 ```

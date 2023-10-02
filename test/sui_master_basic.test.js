@@ -55,6 +55,39 @@ test('keypair generation with seed phrase works ok', async t => {
     t.equal(`${suiMasterNextAccount.address}`, `0xa6fb5c51b751e07a3e3b3af1f40f3115004702aad5a96263ff0be9078195f43b`, 'Ed25519 next account generated ok');
 });
 
+test('keypair generation with seed phrase works ok with secp256r1', async t => {
+    // Ed25519
+    const phrase = 'seek weekend run rival noodle dog alone mosquito decide hover aerobic fiction'; // 
+    const suiMaster = new SuiMaster({provider: 'test', phrase: phrase, keypairAlgo: 'secp256r1'});
+    await suiMaster.initialize();
+
+    t.equal(`${suiMaster.address}`, `0x444f18d480b4d776d7679fae88ebb4f274941a81c3d98db430f7bd13f82e287d`, 'secp256r1 generated ok');
+
+    const suiMasterNextAccount = new SuiMaster({provider: 'test', phrase: phrase, accountIndex: 1, keypairAlgo: 'secp256r1'}); // default = 0
+    await suiMasterNextAccount.initialize();
+
+    t.notEqual(`${suiMaster.address}`, `${suiMasterNextAccount.address}`);
+
+    t.equal(`${suiMasterNextAccount.address}`, `0xae496597c64aa6b1aaa03792c0ba0a725b1212adcb0df85d22c447cd57c21c95`, 'secp256r1 next account generated ok');
+});
+
+
+test('keypair generation with seed phrase works ok with secp256k1', async t => {
+    // Ed25519
+    const phrase = 'seek weekend run rival noodle dog alone mosquito decide hover aerobic fiction'; // 
+    const suiMaster = new SuiMaster({provider: 'test', phrase: phrase, keypairAlgo: 'secp256k1'});
+    await suiMaster.initialize();
+
+    t.equal(`${suiMaster.address}`, `0x86a5dd3def25cab060af90f438842524894c7901839a954b2e9547ecc0f35ef8`, 'secp256k1 generated ok');
+
+    const suiMasterNextAccount = new SuiMaster({provider: 'test', phrase: phrase, accountIndex: 1, keypairAlgo: 'secp256k1'}); // default = 0
+    await suiMasterNextAccount.initialize();
+
+    t.notEqual(`${suiMaster.address}`, `${suiMasterNextAccount.address}`);
+
+    t.equal(`${suiMasterNextAccount.address}`, `0xc5390344b0344a3e657176eaf72ca00ecf3ed4ec791640b6fc65a11cb680c53f`, 'secp256k1 next account generated ok');
+});
+
 test('SuiMaster has MIST_PER_SUI property available as BigInt', async t => {
     const suiMaster = new SuiMaster({provider: 'test', as: 'somebody'});
 
