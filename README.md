@@ -51,31 +51,31 @@ You can initialize it directly, if you have keypair, secret phrase and can use i
 const suiMaster = new SuiMaster({
     keypair: Ed25519Keypair || Secp256r1Keypair || Secp256k1Keypair,
     debug: true,    // echo testing messages to console
-    provider: 'test', // 'test', 'dev', 'local', 'main' or instance of this lib's SuiLocalTestValidator, or instance of Sui's JsonRpcProvider 
+    client: 'test', // 'test', 'dev', 'local', 'main' or instance of this lib's SuiLocalTestValidator
 });
 const suiMaster = new SuiMaster({
     debug: false,
     phrase: 'thrive mean two thrive mean two thrive mean two thrive mean two', // secret phrase to generate keypair
-    provider: 'dev', 
+    client: 'dev', 
 });
 const suiMaster = new SuiMaster({
     debug: false,
     phrase: 'thrive mean two thrive mean two thrive mean two thrive mean two', // secret phrase to generate keypair
     accountIndex: 1, // derive path index (you can generate few addresses with same seed phrase)
-    provider: 'dev', 
+    client: 'dev', 
 });
 const suiMaster = new SuiMaster({
     debug: false,
     phrase: 'thrive mean two thrive mean two thrive mean two thrive mean two', // secret phrase to generate keypair
     keypairAlgo: 'secp256k1', // 'secp256r1' or 'secp256r1' or 'ed25519' default is ed25519
-    provider: 'dev', 
+    client: 'dev', 
 });
 ```
 
 Also, there's option to generate pseudo-random phrases and wallets from strings, works like a charm for testing:
 ```javascript
-const suiMasterAsAdmin = new SuiMaster({ as: 'admin', provider: 'dev', });
-const suiMasterAsUser = new SuiMaster({ as: 'user', provider: 'dev', });
+const suiMasterAsAdmin = new SuiMaster({ as: 'admin', client: 'dev', });
+const suiMasterAsUser = new SuiMaster({ as: 'user', client: 'dev', });
 ```
 
 On browser side, you'd probably want to use Sui wallets extensions adapters to sign message and don't store any keypairs or secret phrases in your code. So there's SuiInBrowser class for this, which can setup suiMaster instance for you. See 'Sui Move Connect in browser' section or sample UI application's code for more details.
@@ -199,7 +199,7 @@ await module.unsubscribeEvents();
 
 ```javascript
 // executing method with parameters of (chat_shop: &ChatShop, metadata: vector<u8>, text: vector<u8>)
-const res = await contract.moveCall('chat', 'post', ['0x10cded4f9df05e37b44e3be2ffa9004dec77786950719fad6083694fdca45bf2', [3,24,55], 'anotherparam']);
+const res = await contract.moveCall('chat', 'post', ['0x10cded4f9df05e37b44e3be2ffa9004dec77786950719fad6083694fdca45bf2', contract.arg('vector<u8>', [3,24,55]), contract.arg('string', 'anotherparam') ]);
 // or await contract.modules.chat.moveCall('methodname', ['somedata', [3,24,55], 'anotherparam']);
     console.log(res);
     for (const object of res.created) {
@@ -212,6 +212,42 @@ const res = await contract.moveCall('chat', 'post', ['0x10cded4f9df05e37b44e3be2
         console.log('deleted', object.address, 'with type of', object.typeName, object.isDeleted);
     }
 ```
+
+##### move methods argumets types
+
+Sui forces you to specify argument type in SDK v1.0, so we are going to follow this paradigm. With few little helpers. Both `SuiPackage` and `SuiPackageModule` have methods to make Inputs.Pure with bcs for you based on the desired type, you can use for executing `suiPackage.moveCall` or `suiPackageModule.moveCall`:
+
+```javascript
+const arguments = [];
+arguments.push(contract.arg('bool', true));
+arguments.push(contract.arg('u8', 222));
+arguments.push(contract.arg('u16', 2222));
+arguments.push(contract.arg('u32', 3333));
+arguments.push(contract.arg('u64', 4444));
+arguments.push(contract.arg('u128', 5555));
+arguments.push(contract.arg('u256', 6666));
+arguments.push(contract.arg('address', '0xd9a95d7cc137f71dd7766f02791536453062a7509e9f461620cc4f583b09134c'));
+arguments.push(contract.arg('string', 'some utf-8 💧string'));
+arguments.push(contract.arg('vector<u8>', 222)); // works for other vectors with primitive contents, e.g. u128, bool etc
+```
+
+Take a look at unit test covering all types arguments [here](test/different_types_args.test.js)
+
+##### move methods typed arguments
+
+To specify types for move methods declared as:
+
+```rust
+public entry fun method<T>(...)
+```
+
+you can specify `typeArguments` as a 3rd parameter to `suiPackageModule.moveCall` or 4th to `suiPackage.moveCall`:
+
+```javascript
+await mod.moveCall('test_method', [ store.id ], [ '0xca90beae66f23df1a830357c92e0a4348b6164d142c96b06936c5f28fdeaa99f::different_types::Store' ]);
+await contract.moveCall('module_name', 'test_method', [ store.id ], [ '0xca90beae66f23df1a83036936c5f28fdeaa99f::different_types::Store' ]);
+```
+
 
 ##### sending sui / coins with smart contract methods
 
@@ -234,7 +270,7 @@ So executing
 const params = [
     chatShopObjectId,
     {type: '0xc060006111016b8a020ad5b33834984a437aaa7d3c74c18e09a95d48aceab08c::coin::COIN', amount: '9.99'},
-    messageText,
+    contract.arg('string', messageText),
 ];
 const moveCallResult = await contract.moveCall('suidouble_chat', 'post_pay', params);
 ```
@@ -247,7 +283,7 @@ Some smart contracts requires clients to send coins in form of vectors. This is 
 const params = [
     chatShopObjectId,
     [{type: '0xc060006111016b8a020ad5b33834984a437aaa7d3c74c18e09a95d48aceab08c::coin::COIN', amount: '9.99'}],
-    messageText,
+    contract.arg('string', messageText),
 ];
 ```
 
@@ -265,7 +301,7 @@ const txb = new TransactionBlock();
 txb.moveCall({
     target: `package_id::module_id::method_name`,
     arguments: [
-        txb.pure(something),
+        txb.pure(contract.arg('u256', something)),
         txb.object(someid),
     ],
 });
@@ -306,8 +342,8 @@ Builds a package and publish it to blockchain. CLI thing, as it needs `execSync`
 ```javascript
 const { SuiMaster } = require('suidouble');
 
-const provider = 'dev';
-const suiMaster = new SuiMaster({ debug: true, as: 'admin', provider: provider, });
+const client = 'dev';
+const suiMaster = new SuiMaster({ debug: true, as: 'admin', client: client, });
 
 await suiMaster.requestSuiFromFaucet();
 await suiMaster.getBalance();
@@ -327,9 +363,9 @@ Same, it's for CLI as it re-builds the package.
 ```javascript
 const { SuiMaster } = require('suidouble');
 
-const provider = 'local';// or await SuiLocalTestValidator.launch({debug: true, epochDuration: 30000});
+const client = 'local';// or await SuiLocalTestValidator.launch({debug: true, epochDuration: 30000});
 
-const suiMaster = new SuiMaster({ debug: true, as: 'admin', provider: provider, });
+const suiMaster = new SuiMaster({ debug: true, as: 'admin', client: client, });
 await suiMaster.requestSuiFromFaucet();
 await suiMaster.getBalance();
 
@@ -362,7 +398,7 @@ await testScenario.init();
 
 await testScenario.nextTx('admin', async()=>{
     const chatShop = testScenario.takeShared('ChatShop');
-    await testScenario.moveCall('chat', 'post', [chatShop.address, 'posting a message', 'metadata']);
+    await testScenario.moveCall('chat', 'post', [chatShop.address, testScenario.arg('string', 'posting a message'), testScenario.arg('string', 'metadata') ]);
     const chatTopMessage = testScenario.takeShared('ChatTopMessage');
 
     assert(chatTopMessage != null);
@@ -371,7 +407,7 @@ await testScenario.nextTx('admin', async()=>{
 
 await testScenario.nextTx('somebody', async()=>{
     const chatTopMessage = testScenario.takeShared('ChatTopMessage');
-    await testScenario.moveCall('chat', 'reply', [chatTopMessage.address, 'posting a response', 'metadata']);
+    await testScenario.moveCall('chat', 'reply', [chatTopMessage.address, testScenario.arg('string', 'posting a response'), testScenario.arg('string', 'metadata') ]);
     const chatResponse = testScenario.takeFromSender('ChatResponse');
 
     assert(chatResponse != null);
@@ -420,7 +456,7 @@ suiInBrowser.addEventListener('connected', async()=>{
         console.log('event', event.parsedJson);
     }
 
-    const res = await contract.moveCall('chat', 'post', ['somedata', [3,24,55], 'anotherparam']);
+    const res = await contract.moveCall('chat', 'post', [contract.arg('string', 'somedata'), contract.arg('vector<u8>', 'somedata') ]);
     console.log(res);
     for (const object of res.created) {
         console.log('created', object.address, 'with type of', object.typeName); // instances of SuiObject (@todo: write documentation for it)

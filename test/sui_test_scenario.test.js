@@ -29,7 +29,7 @@ test('checking takeShared', async t => {
         t.ok(chatShop.address); // there should be some address
         t.ok(`${chatShop.address}`.indexOf('0x') === 0); // adress is string starting with '0x'
 
-        await testScenario.moveCall('suidouble_chat', 'post', [chatShop.address, 'posting a message', 'metadata']);
+        await testScenario.moveCall('suidouble_chat', 'post', [chatShop.address, testScenario.arg('string', 'posting a message'),  testScenario.arg('string', 'metadata')]);
         const chatTopMessage = testScenario.takeShared('ChatTopMessage');
 
         t.ok(chatTopMessage.address); // there should be some address
@@ -44,7 +44,7 @@ test('checking takeOwned', async t => {
         const chatTopMessage = testScenario.takeShared('ChatTopMessage');
         t.ok(chatTopMessage.address); // there should be some address
 
-        await testScenario.moveCall('suidouble_chat', 'reply', [chatTopMessage.address, 'posting a response', 'metadata']);
+        await testScenario.moveCall('suidouble_chat', 'reply', [chatTopMessage.address, testScenario.arg('string', 'posting a response'), testScenario.arg('string', 'metadata')]);
         const chatResponse = testScenario.takeFromSender('ChatResponse');
 
         t.ok(chatResponse.address); // there should be some address
