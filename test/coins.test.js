@@ -3,7 +3,7 @@
 const t = require('tap');
 const { test } = t;
 
-const { SuiMaster, SuiLocalTestValidator, TransactionBlock } = require('..');
+const { SuiMaster, SuiLocalTestValidator, Transaction } = require('..');
 
 let suiLocalTestValidator = null;
 let suiMaster = null;
@@ -18,7 +18,7 @@ test('spawn local test node', async t => {
 });
 
 test('init suiMaster and connect it to local test validator', async t => {
-    suiMaster = new SuiMaster({provider: 'local', as: 'somebody', debug: true});
+    suiMaster = new SuiMaster({client: 'local', as: 'somebody', debug: true});
     await suiMaster.initialize();
 
     t.ok(suiMaster.address); // there should be some address
@@ -56,16 +56,16 @@ test('string representation works ok', async t => {
     await suiCoin.getMetadata();
 
     const toDisplay1 = suiCoin.amountToString(suiMaster.MIST_PER_SUI);
-    t.equals(toDisplay1, '1.0');
+    t.equal(toDisplay1, '1.0');
 
     const toDisplay2 = suiCoin.amountToString(1); // 1 mist
-    t.equals(toDisplay2, '0.000000001');
+    t.equal(toDisplay2, '0.000000001');
 
     const toDisplay3 = suiCoin.amountToString(suiMaster.MIST_PER_SUI * BigInt(1000) + BigInt(1)); // 1000 SUI + 1 mist
-    t.equals(toDisplay3, '1000.000000001');
+    t.equal(toDisplay3, '1000.000000001');
 
     const toDisplay4 = suiCoin.amountToString(suiMaster.MIST_PER_SUI * BigInt(1000) - BigInt(1)); // 1000 SUI - 1 mist
-    t.equals(toDisplay4, '999.999999999');
+    t.equal(toDisplay4, '999.999999999');
 });
 
 test('you have no SUI on the fresh node', async t => {
@@ -87,12 +87,12 @@ test('getting coin objects for a transaction', async t => {
 
     const wasBalance = await suiCoin.getBalance(suiMaster.address);
 
-    const txb = new TransactionBlock();
-    const coinInput = await suiCoin.coinOfAmountToTxCoin(txb, suiMaster.address, suiMaster.MIST_PER_SUI); // pick 1 SUI
-    txb.transferObjects([coinInput], txb.pure('0x1d20dcdb2bca4f508ea9613994683eb4e76e9c4ed371169677c1be02aaf0b12a')); // send it anywhere
+    const tx = new Transaction();
+    const coinInput = await suiCoin.coinOfAmountToTxCoin(tx, suiMaster.address, suiMaster.MIST_PER_SUI); // pick 1 SUI
+    tx.transferObjects([coinInput], tx.pure('0x1d20dcdb2bca4f508ea9613994683eb4e76e9c4ed371169677c1be02aaf0b12a')); // send it anywhere
 
-    const result = await suiMaster.signAndExecuteTransactionBlock({
-        transactionBlock: txb,
+    const result = await suiMaster.signAndExecuteTransaction({
+        transaction: tx,
         requestType: 'WaitForLocalExecution',
         options: {
         },

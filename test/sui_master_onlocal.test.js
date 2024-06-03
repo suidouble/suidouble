@@ -27,7 +27,7 @@ test('spawn local test node', async t => {
 });
 
 test('init suiMaster and connect it to local test validator', async t => {
-    suiMaster = new SuiMaster({provider: suiLocalTestValidator, as: 'somebody', debug: true});
+    suiMaster = new SuiMaster({client: suiLocalTestValidator, as: 'somebody', debug: true});
     await suiMaster.initialize();
 
     t.ok(suiMaster.address); // there should be some address
@@ -97,7 +97,7 @@ test('attach a local package', async t => {
 });
 
 test('attach a package by address on the blockchain', async t => {
-    suiMaster = new SuiMaster({provider: suiLocalTestValidator, as: 'somebody'});
+    suiMaster = new SuiMaster({client: suiLocalTestValidator, as: 'somebody'});
     await suiMaster.initialize();
 
     contract = await suiMaster.addPackage({
@@ -124,7 +124,7 @@ test('attach a package by address on the blockchain', async t => {
 });
 
 test('can find a package on the blockchain by expected module name (in owned)', async t => {
-    suiMaster = new SuiMaster({provider: suiLocalTestValidator, as: 'somebody'});
+    suiMaster = new SuiMaster({client: suiLocalTestValidator, as: 'somebody'});
     await suiMaster.initialize();
 
     contract = await suiMaster.addPackage({
@@ -166,7 +166,7 @@ test('subscribe to module events', async t => {
         gotEventChatResponseCreated = event.detail; // .detail is reference to event itself. To support CustomEvent pattern
     });
 
-    await contract.moveCall('suidouble_chat', 'post', [chatShopObjectId, 'the message', 'metadata']);
+    await contract.moveCall('suidouble_chat', 'post', [chatShopObjectId, contract.arg('string', 'the message'), contract.arg('string', 'metadata')]);
     await new Promise((res)=>setTimeout(res, 300)); // got events without timeout, but just to be sure.
 
     t.ok(gotEventChatTopMessageCreated);
@@ -181,7 +181,7 @@ test('subscribe to module events', async t => {
 });
 
 test('execute contract methods', async t => {
-    const moveCallResult = await contract.moveCall('suidouble_chat', 'post', [chatShopObjectId, 'the message', 'metadata']);
+    const moveCallResult = await contract.moveCall('suidouble_chat', 'post', [chatShopObjectId, contract.arg('string', 'the message'), contract.arg('string', 'metadata')]);
 
     // there're at least some object created
     t.ok(moveCallResult.created.length > 0);
@@ -223,7 +223,7 @@ test('execute contract methods', async t => {
     t.ok(dynamicFields.data.length === 1);
 
     const responseTextAsBytes = [].slice.call(new TextEncoder().encode('ขอบคุณครับ, 🇺🇦')); // regular array with utf data
-    const moveCallResult2 = await contract.moveCall('suidouble_chat', 'reply', [chatTopMessage.id, responseTextAsBytes, 'metadata']);
+    const moveCallResult2 = await contract.moveCall('suidouble_chat', 'reply', [chatTopMessage.id, contract.arg('string', 'ขอบคุณครับ, 🇺🇦'), contract.arg('string', 'metadata')]);
 
     // there're at least some object created
     t.ok(moveCallResult2.created.length > 0);
@@ -248,7 +248,7 @@ test('testing paginatedResponse', async t => {
     t.ok(chatTopMessage);
 
     // fill method create a lot of responses ( check out contract's code )
-    const moveCallResult = await contract.moveCall('suidouble_chat', 'fill', [chatTopMessage.id, 'the message response', 'metadata']);
+    const moveCallResult = await contract.moveCall('suidouble_chat', 'fill', [chatTopMessage.id, contract.arg('string', 'the message response'), contract.arg('string', 'metadata')]);
     t.ok(moveCallResult.created.length >= 60); // it's 60 in move code, but let's keep chat flexible
 
     const eventsResponse = await contract.fetchEvents('suidouble_chat');
@@ -282,6 +282,8 @@ test('testing paginatedResponse', async t => {
 
 test('find owned module objects with query', async t => {
     const module = await contract.getModule('suidouble_chat');
+    await module.getNormalizedMoveFunction('fill');
+
     const paginatedResponse = await module.getOwnedObjects();
 
     let foundCount = 0;
@@ -319,10 +321,10 @@ test('testing move call with coins', async t => {
 
     const longMessageYouCanNotPostForFree = ('message ').padEnd(500, 'test');
     // can't post it for free (as per contract design)
-    t.rejects(contract.moveCall('suidouble_chat', 'post', [chatShopObjectId, longMessageYouCanNotPostForFree, 'metadata']));
+    t.rejects(contract.moveCall('suidouble_chat', 'post', [chatShopObjectId, contract.arg('string', longMessageYouCanNotPostForFree), contract.arg('string', 'metadata')]));
 
     // but can post with with post_pay function sending some sui to it
-    const moveCallResult = await contract.moveCall('suidouble_chat', 'post_pay', [chatShopObjectId, {type: 'SUI', amount: 400000000000n}, longMessageYouCanNotPostForFree, 'metadata']);
+    const moveCallResult = await contract.moveCall('suidouble_chat', 'post_pay', [chatShopObjectId, {type: 'SUI', amount: 400000000000n}, contract.arg('string', longMessageYouCanNotPostForFree), contract.arg('string', 'metadata')]);
 
     // there're at least some object created
     t.ok(moveCallResult.created.length > 0);
