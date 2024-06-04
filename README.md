@@ -228,7 +228,7 @@ arguments.push(contract.arg('u128', 5555));
 arguments.push(contract.arg('u256', 6666));
 arguments.push(contract.arg('address', '0xd9a95d7cc137f71dd7766f02791536453062a7509e9f461620cc4f583b09134c'));
 arguments.push(contract.arg('string', 'some utf-8 💧string'));
-arguments.push(contract.arg('vector<u8>', 222)); // works for other vectors with primitive contents, e.g. u128, bool etc
+arguments.push(contract.arg('vector<u8>', [222,111,211])); // works for other vectors with primitive contents, e.g. u128, bool etc
 ```
 
 Take a look at unit test covering all types arguments [here](test/different_types_args.test.js)
