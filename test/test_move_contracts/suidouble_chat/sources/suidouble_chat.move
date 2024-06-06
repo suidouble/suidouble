@@ -3,7 +3,7 @@ module suidouble_chat::suidouble_chat {
     use sui::object::{Self, UID, ID};
     use sui::transfer;
     use sui::tx_context::{Self, TxContext};
-    use std::vector::length;
+    use std::vector::{Self, length};
 
     use sui::dynamic_object_field::{Self};
 
@@ -12,6 +12,7 @@ module suidouble_chat::suidouble_chat {
     use sui::balance::{Self, Balance};
     
     use std::debug;
+    use sui::pay;
 
     use sui::event::emit;
 
@@ -168,6 +169,17 @@ module suidouble_chat::suidouble_chat {
         transfer::share_object(chat_top_message);
     }
 
+    public entry fun post_pay_with_coin_vector(
+        chat_shop: &mut ChatShop,
+        coins: vector<Coin<SUI>>,
+        text: vector<u8>,
+        metadata: vector<u8>,
+        ctx: &mut TxContext
+    ) {
+        let base = vector::pop_back(&mut coins);
+        pay::join_vec(&mut base, coins);
+        post_pay(chat_shop, base, text, metadata, ctx);
+    }
 
     /// Mint (post) a ChatResponse object 
     public entry fun reply(

@@ -346,9 +346,7 @@ test('testing move call with coins', async t => {
 
     t.ok(foundChatTopMessage);
     t.ok(foundChatResponse);
-    
-    // messageTextAsBytes = [].slice.call(new TextEncoder().encode(messageText)); // regular array with utf data
-    // suidouble_chat contract store text a bytes (easier to work with unicode things), let's convert it back to js string
+
     foundText = new TextDecoder().decode(new Uint8Array(foundText));
 
     t.equal(foundText, longMessageYouCanNotPostForFree);
@@ -356,6 +354,19 @@ test('testing move call with coins', async t => {
     const balanceNow = await suiMaster.getBalance();
 
     t.ok( balanceNow <= (balanceWas - 400000000000n) );
+});
+
+test('testing move call with vector<Coin<..>>', async t => {
+    const balanceWas = await suiMaster.getBalance();
+    const longMessageYouCanNotPostForFree = ('message ').padEnd(500, 'test');
+
+    // you can pass vector of coin, wrapping it's definition in array
+    const moveCallResult = await contract.moveCall('suidouble_chat', 'post_pay_with_coin_vector', [chatShopObjectId, [{type: 'SUI', amount: 400000000000n}], contract.arg('string', longMessageYouCanNotPostForFree), contract.arg('string', 'metadata')]);
+    // it's the wrapper over the same move function we've already tested, so lets keep the unit simple:
+    t.ok(moveCallResult.created.length > 0);
+
+    const balanceNow = await suiMaster.getBalance();
+    t.ok( balanceNow <= (balanceWas - 400000000000n) ); // vector<Coin<SUI>> paid
 });
 
 test('testing move call deleting object', async t => {
