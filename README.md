@@ -168,7 +168,9 @@ while (events.hasNextPage) {
 
 ##### subscribing to events
 
-You can subscribe to Sui's contract events on package's module level. No types-etc filters for now ( @todo? )
+*** Subscribe to Events is deprecated in Sui SDK *** You should plan to use different architecture in your application.
+
+You can subscribe to Sui's contract events on package's module level. 
 
 ```javascript
 const module = await contract.getModule('suidouble_chat');

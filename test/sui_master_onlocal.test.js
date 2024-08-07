@@ -152,33 +152,36 @@ test('can find a package on the blockchain by expected module name (in owned)', 
     t.equal(contract.version, 2);
 });
 
-test('subscribe to module events', async t => {
-    const module = await contract.getModule('suidouble_chat');
-    await module.subscribeEvents();
+// Event websocket subscriptions are going to be deprecated.
+// test('subscribe to module events', async t => {
+//     const module = await contract.getModule('suidouble_chat');
+//     await module.subscribeEvents();
 
-    let gotEventChatTopMessageCreated = false;
-    let gotEventChatResponseCreated = false;
+//     let gotEventChatTopMessageCreated = false;
+//     let gotEventChatResponseCreated = false;
 
-    module.addEventListener('ChatTopMessageCreated', (event)=>{
-        gotEventChatTopMessageCreated = event;
-    });
-    module.addEventListener('ChatResponseCreated', (event)=>{
-        gotEventChatResponseCreated = event.detail; // .detail is reference to event itself. To support CustomEvent pattern
-    });
+//     module.addEventListener('ChatTopMessageCreated', (event)=>{
+//         gotEventChatTopMessageCreated = event;
+//     });
+//     module.addEventListener('ChatResponseCreated', (event)=>{
+//         gotEventChatResponseCreated = event.detail; // .detail is reference to event itself. To support CustomEvent pattern
+//     });
 
-    await contract.moveCall('suidouble_chat', 'post', [chatShopObjectId, contract.arg('string', 'the message'), contract.arg('string', 'metadata')]);
-    await new Promise((res)=>setTimeout(res, 300)); // got events without timeout, but just to be sure.
+//     await contract.moveCall('suidouble_chat', 'post', [chatShopObjectId, contract.arg('string', 'the message'), contract.arg('string', 'metadata')]);
+//     await new Promise((res)=>setTimeout(res, 300)); // got events without timeout, but just to be sure.
 
-    t.ok(gotEventChatTopMessageCreated);
-    t.ok(gotEventChatResponseCreated);
+//     t.ok(gotEventChatTopMessageCreated);
+//     t.ok(gotEventChatResponseCreated);
 
-    // just some checks that events have data by contract's architecture
-    t.ok(gotEventChatResponseCreated.parsedJson.top_message_id == gotEventChatTopMessageCreated.parsedJson.id);
-    t.ok(gotEventChatTopMessageCreated.parsedJson.top_response_id == gotEventChatResponseCreated.parsedJson.id);
+//     // just some checks that events have data by contract's architecture
+//     t.ok(gotEventChatResponseCreated.parsedJson.top_message_id == gotEventChatTopMessageCreated.parsedJson.id);
+//     t.ok(gotEventChatTopMessageCreated.parsedJson.top_response_id == gotEventChatResponseCreated.parsedJson.id);
 
-    // unsubscribing from events, to close websocket
-    await module.unsubscribeEvents();
-});
+//     // unsubscribing from events, to close websocket
+//     await module.unsubscribeEvents();
+
+//     t.end();
+// });
 
 test('execute contract methods', async t => {
     const moveCallResult = await contract.moveCall('suidouble_chat', 'post', [chatShopObjectId, contract.arg('string', 'the message'), contract.arg('string', 'metadata')]);
