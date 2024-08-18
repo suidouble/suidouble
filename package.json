@@ -1,11 +1,11 @@
 {
   "name": "suidouble",
-  "version": "1.0.5",
+  "version": "1.6.0",
   "description": "Set of provider, package and object classes for javascript representation of Sui Move smart contracts. Use same code for publishing, upgrading, integration testing, interaction with smart contracts and integration in browser web3 dapps",
   "main": "index.js",
   "scripts": {
-    "test": "tap -j=1 ./test/*.test.js",
-    "coverage": "tap -j=1 ./test/*.test.js"
+    "test": "tap -j1 -t120 ./test/*.test.js",
+    "coverage": "tap -j1 -t120 ./test/*.test.js"
   },
   "keywords": [
     "sui",
@@ -21,12 +21,12 @@
   "author": "Jeka Kiselyov <jeka911@gmail.com> (https://github.com/jeka-kiselyov)",
   "license": "Apache-2.0",
   "dependencies": {
-    "@mysten/sui": "1.0.5",
+    "@mysten/sui": "^1.6.0",
     "@wallet-standard/core": "^1.0.3",
     "websocket": "^1.0.35"
   },
   "devDependencies": {
-    "tap": "^16.3.4"
+    "tap": "^21.0.1"
   },
   "browser": {
     "child_process": false,
@@ -34,9 +34,5 @@
     "path": false
   },
   "tap": {
-    "branches": 90,
-    "lines": 90,
-    "functions": 90,
-    "statements": 90
   }
 }

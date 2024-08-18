@@ -294,20 +294,21 @@ Don't forget to test transactions sending real money on devnet/testnet first!
 
 ##### composing transaction block yourself
 
-If you need more flexebility, there's always an option to construct the transaction block yourself:
+If you need more flexebility, there's always an option to construct the transaction yourself:
 
 ```javascript
-const { TransactionBlock, Transactions } = require('suidobule'); // this exposes classes from the "@mysten/sui.js", so you don't have to import them separately
+const { Transaction, txInput } = require('suidobule'); // this exposes classes from the "@mysten/sui.js", so you don't have to import them separately
 
-const txb = new TransactionBlock();
-txb.moveCall({
+const tx = new Transaction();
+tx.moveCall({
     target: `package_id::module_id::method_name`,
     arguments: [
-        txb.pure(contract.arg('u256', something)),
-        txb.object(someid),
+        txInput(tx, 'u256', some_value),
+        txInput(tx, 'vector<bool>', some_array),
+        tx.object('0xc060006111016b8a020ad5b33834984a437aaa7d3c74c18e09a95d48aceab08c'), // object ids are ok t
     ],
 });
-const moveCallResult = await contract.moveCall('suidouble_chat', 'post_pay', {tx: txb});
+const moveCallResult = await contract.moveCall('suidouble_chat', 'post_pay', {tx: tx});
 ```
 
 

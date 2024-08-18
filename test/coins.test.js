@@ -89,7 +89,7 @@ test('getting coin objects for a transaction', async t => {
 
     const tx = new Transaction();
     const coinInput = await suiCoin.coinOfAmountToTxCoin(tx, suiMaster.address, suiMaster.MIST_PER_SUI); // pick 1 SUI
-    tx.transferObjects([coinInput], tx.pure('0x1d20dcdb2bca4f508ea9613994683eb4e76e9c4ed371169677c1be02aaf0b12a')); // send it anywhere
+    tx.transferObjects([coinInput], '0x1d20dcdb2bca4f508ea9613994683eb4e76e9c4ed371169677c1be02aaf0b12a'); // send it anywhere
 
     const result = await suiMaster.signAndExecuteTransaction({
         transaction: tx,

@@ -16,4 +16,5 @@ module.exports = {
     Transaction: Transaction,
     Commands: Commands,
     SuiUtils: SuiUtils,
+    txInput: SuiUtils.txInput,
 };
