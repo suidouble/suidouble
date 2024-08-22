@@ -5,6 +5,7 @@ const SuiObject = require('./lib/SuiObject.js');
 const SuiUtils = require('./lib/SuiUtils.js');
 const SuiLocalTestValidator = require('./lib/SuiLocalTestValidator.js');
 const { Transaction, Commands } = require('@mysten/sui/transactions');
+const { bcs } = require('@mysten/sui/bcs');
 
 module.exports = {
     SuiMaster,
@@ -17,4 +18,5 @@ module.exports = {
     Commands: Commands,
     SuiUtils: SuiUtils,
     txInput: SuiUtils.txInput,
+    bcs,
 };
