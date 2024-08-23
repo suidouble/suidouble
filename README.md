@@ -46,12 +46,17 @@ Main class to interact with blockchain is SuiMaster:
 const { SuiMaster } = require('suidouble');
 ```
 
-You can initialize it directly, if you have keypair, secret phrase and can use it in code (so on node.js side - server side or CLI apps):
+You can initialize it directly, if you have keypair, secret phrase, or privateKey and can use it in code (so on node.js side - server side or CLI apps):
 ```javascript
 const suiMaster = new SuiMaster({
     keypair: Ed25519Keypair || Secp256r1Keypair || Secp256k1Keypair,
     debug: true,    // echo testing messages to console
     client: 'test', // 'test', 'dev', 'local', 'main' or instance of this lib's SuiLocalTestValidator
+});
+const suiMaster = new SuiMaster({
+    debug: false,
+    privateKey: 'suiprivkey1qpwly9xrfsv50mqug706s40l58klez5q6mpchq4f5ldzktjyr4x7yhj9lf2',
+    client: 'dev', 
 });
 const suiMaster = new SuiMaster({
     debug: false,

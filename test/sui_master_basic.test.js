@@ -39,6 +39,15 @@ test('pseudo-random keypairs generation works ok', async t => {
     t.equal(`${suiMasterAsAdminAnother.address}`, `${suiMasterAsAdmin.address}`, 'same string should generate same pseudo-random');
 });
 
+test('keypair generation with privateKey works ok', async t => {
+    const privateKey = 'suiprivkey1qpwly9xrfsv50mqug706s40l58klez5q6mpchq4f5ldzktjyr4x7yhj9lf2'; 
+    const suiMaster = new SuiMaster({client: 'test', privateKey: privateKey});
+    await suiMaster.initialize();
+
+    t.equal(`${suiMaster.address}`, `0x4d07e4a382dcb69288a8a4589e8fc0534378dad76b75565fda0c1e9ada45b7d1`, 'by privateKey generated ok');
+});
+
+
 test('keypair generation with seed phrase works ok', async t => {
     // Ed25519
     const phrase = 'seek weekend run rival noodle dog alone mosquito decide hover aerobic fiction'; // 0x2bfe9c35ca9400c42e24e4b424cbd2dfb51bcb7c2487e1b4694ff53d8ca00262
