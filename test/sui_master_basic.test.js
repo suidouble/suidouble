@@ -1,9 +1,16 @@
 'use strict'
 
-const t = require('tap');
-const { test } = t;
+import t from 'tap';
+import { SuiMaster, MIST_PER_SUI } from '../index.js';
 
-const { SuiMaster, MIST_PER_SUI } = require('..');
+import { fileURLToPath } from 'url';
+import path from 'path';
+
+const { test } = t;
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+
 
 test('initialization', async t => {
 	t.plan(2);

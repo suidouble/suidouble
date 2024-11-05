@@ -1,10 +1,14 @@
 'use strict'
 
-const t = require('tap');
-const { test } = t;
-const path = require('path');
+import t from 'tap';
+import { SuiTestScenario } from '../index.js';
 
-const { SuiTestScenario } = require('..');
+import { fileURLToPath } from 'url';
+import path from 'path';
+
+const { test } = t;
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 let testScenario = null;
 

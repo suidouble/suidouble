@@ -1,15 +1,14 @@
 'use strict'
 
-const t = require('tap');
+import t from 'tap';
+import { SuiMaster, SuiLocalTestValidator, Transaction } from '../index.js';
 const { test } = t;
-
-const { SuiMaster, SuiLocalTestValidator, Transaction } = require('..');
 
 let suiLocalTestValidator = null;
 let suiMaster = null;
 
 test('spawn local test node', async t => {
-    suiLocalTestValidator = await SuiLocalTestValidator.launch({ testFallbackEnabled: true });
+    suiLocalTestValidator = await SuiLocalTestValidator.launch({ testFallbackEnabled: true, debug: true, });
     t.ok(suiLocalTestValidator.active);
 
     // SuiLocalTestValidator runs as signle instance. So you can't start it twice with static method
@@ -33,6 +32,13 @@ test('type is normalized for SUI', async t => {
     const suiCoin4 = suiMaster.suiCoins.get('0x2::sui::SUI');
     const suiCoin5 = suiMaster.suiCoins.get('2::sui::SUI');
     const suiCoin6 = suiMaster.suiCoins.get('0000000000000000000000000000000000000000000000000000000000000002::sui::SUI');
+
+    console.log(suiCoin1.coinType);
+    console.log(suiCoin2.coinType);
+    console.log(suiCoin3.coinType);
+    console.log(suiCoin4.coinType);
+    console.log(suiCoin5.coinType);
+    console.log(suiCoin6.coinType);
 
     t.ok(suiCoin1.coinType == suiCoin2.coinType);
     t.ok(suiCoin1.coinType == suiCoin3.coinType);

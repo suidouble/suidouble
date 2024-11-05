@@ -2,10 +2,16 @@
 
 // just a basic test of InBrowser classes. No real interaction, just structure and events
 
-const t = require('tap');
-const { test } = t;
+import t from 'tap';
+import { SuiInBrowser } from '../index.js';
 
-const { SuiInBrowser } = require('..');
+import { fileURLToPath } from 'url';
+import path from 'path';
+
+const { test } = t;
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 
 test('as single instance', async t => {
     // probably you'd want a single instance of SuiInBrowser class on your dapp,

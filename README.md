@@ -43,7 +43,7 @@ npm install suidouble --save
 Main class to interact with blockchain is SuiMaster:
 
 ```javascript
-const { SuiMaster } = require('suidouble');
+import { SuiMaster } from 'suidouble';
 ```
 
 You can initialize it directly, if you have keypair, secret phrase, or privateKey and can use it in code (so on node.js side - server side or CLI apps):
@@ -85,7 +85,7 @@ const suiMasterAsUser = new SuiMaster({ as: 'user', client: 'dev', });
 
 On browser side, you'd probably want to use Sui wallets extensions adapters to sign message and don't store any keypairs or secret phrases in your code. So there's SuiInBrowser class for this, which can setup suiMaster instance for you. See 'Sui Move Connect in browser' section or sample UI application's code for more details.
 ```javascript
-const { SuiInBrowser } = require('suidouble');
+import { SuiInBrowser } from 'suidouble';
 const suiInBrowser = SuiInBrowser.getSingleton(); // you probably don't want to keep few connections, so there's singleton
 /// ...
 suiInBrowser.addEventListener('connected', async()=>{
@@ -175,32 +175,6 @@ while (events.hasNextPage) {
 
 *** Subscribe to Events is deprecated in Sui SDK *** You should plan to use different architecture in your application.
 
-You can subscribe to Sui's contract events on package's module level. 
-
-```javascript
-const module = await contract.getModule('suidouble_chat');
-await module.subscribeEvents();
-module.addEventListener('ChatResponseCreated', (suiEvent)=>{
-    // received message emited by 
-    // emit(ChatResponseCreated { id: object::uid_to_inner(&chat_response_id), top_message_id: object::uid_to_inner(&id), seq_n: 0 });
-    // in suidouble_chat 's smart contract
-    console.log(suiEvent.typeName); // == 'ChatResponseCreated'
-    console.log(suiEvent.parsedJson);
-});
-module.addEventListener('ChatTopMessageCreated', (suiEvent)=>{
-    // received message emited by 
-    // emit(ChatTopMessageCreated { id: object::uid_to_inner(&id), top_response_id: object::uid_to_inner(&chat_response_id),  });
-    // in suidouble_chat 's smart contract
-    console.log(suiEvent.typeName); // == 'ChatTopMessageCreated'
-    console.log(suiEvent.parsedJson);
-});
-```
-
-Don't forget to unsubscribe from events when you don't need them anymore:
-
-```javascript
-await module.unsubscribeEvents();
-```
 
 ##### executing smart contract method
 
@@ -302,7 +276,7 @@ Don't forget to test transactions sending real money on devnet/testnet first!
 If you need more flexebility, there's always an option to construct the transaction yourself:
 
 ```javascript
-const { Transaction, txInput } = require('suidobule'); // this exposes classes from the "@mysten/sui.js", so you don't have to import them separately
+import { Transaction, txInput } from 'suidouble'; 
 
 const tx = new Transaction();
 tx.moveCall({
@@ -348,7 +322,8 @@ await paginatedResponse.forEach(async(suiObject)=>{
 Builds a package and publish it to blockchain. CLI thing, as it needs `execSync` to run `sui move build`. Tested on Ubuntu, works good. If you have some issues with other platforms - please feel free to let me know or post Pull Request.
 
 ```javascript
-const { SuiMaster } = require('suidouble');
+import { SuiMaster } from 'suidouble'; 
+
 
 const client = 'dev';
 const suiMaster = new SuiMaster({ debug: true, as: 'admin', client: client, });
@@ -369,7 +344,7 @@ console.log('published as', package.address);
 Same, it's for CLI as it re-builds the package.
 
 ```javascript
-const { SuiMaster } = require('suidouble');
+import { SuiMaster } from 'suidouble'; 
 
 const client = 'local';// or await SuiLocalTestValidator.launch({debug: true, epochDuration: 30000});
 
@@ -394,7 +369,7 @@ CLI integration tests, it runs local testing node (has to be installed), build a
 suidouble try to mimic Sui Move's testing framework:
 
 ```javascript
-const SuiTestScenario = require('./lib/SuiTestScenario.js');
+import { SuiTestScenario } from 'suidouble'; 
 
 const testScenario = new SuiTestScenario({
     path: '../path_to_move_project_root/',
@@ -432,7 +407,7 @@ Check out [suidouble Vue component](https://www.npmjs.com/package/vue-sui) to co
 Or write the one manually, code is framework independed:
 
 ```javascript
-const { SuiInBrowser } = require('suidouble');
+import { SuiInBrowser } from 'suidouble'; 
 
 const suiInBrowser = SuiInBrowser.getSingleton();
 const suiMaster = await suiInBrowser.getSuiMaster(); // not yet connected, works in read-only mode (no signing-posting txs).

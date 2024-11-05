@@ -1,22 +1,25 @@
-const SuiMaster = require('./lib/SuiMaster.js');
-const SuiInBrowser = require('./lib/SuiInBrowser.js');
-const SuiTestScenario = require('./lib/SuiTestScenario.js');
-const SuiObject = require('./lib/SuiObject.js');
-const SuiUtils = require('./lib/SuiUtils.js');
-const SuiLocalTestValidator = require('./lib/SuiLocalTestValidator.js');
-const { Transaction, Commands } = require('@mysten/sui/transactions');
-const { bcs } = require('@mysten/sui/bcs');
+import SuiMaster from './lib/SuiMaster.js';
+import SuiInBrowser from './lib/SuiInBrowser.js';
+import SuiTestScenario from './lib/SuiTestScenario.js';
+import SuiObject from './lib/SuiObject.js';
+import SuiUtils from './lib/SuiUtils.js';
+import SuiLocalTestValidator from './lib/SuiLocalTestValidator.js';
+import  { Transaction, Commands } from '@mysten/sui/transactions';
+import { bcs } from '@mysten/sui/bcs';
 
-module.exports = {
+const txInput = SuiUtils.txInput;
+const MIST_PER_SUI = SuiMaster.MIST_PER_SUI;
+
+export {
     SuiMaster,
     SuiObject,
     SuiInBrowser,
     SuiTestScenario,
     SuiLocalTestValidator,
-    MIST_PER_SUI: SuiMaster.MIST_PER_SUI,
-    Transaction: Transaction,
-    Commands: Commands,
-    SuiUtils: SuiUtils,
-    txInput: SuiUtils.txInput,
+    MIST_PER_SUI,
+    Transaction,
+    Commands,
+    SuiUtils,
+    txInput,
     bcs,
 };
