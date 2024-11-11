@@ -5,6 +5,8 @@ import { SuiMaster, SuiLocalTestValidator, Transaction } from '../index.js';
 const { test } = t;
 
 let suiLocalTestValidator = null;
+
+/** @type {SuiMaster} */
 let suiMaster = null;
 
 test('spawn local test node', async t => {
@@ -88,6 +90,22 @@ test('have some after requesting from faucet', async t => {
     t.ok(balance > BigInt(0));
 });
 
+test('have some in balance query', async t => {
+    const balances = await suiMaster.suiCoins.getAllBalances();
+
+    let ok = false;
+    for (const balance of balances) {
+        if (balance.coin.isSUI()) {
+            if (balance.totalBalance > 0n) {
+                ok = true;
+            }
+        }
+    }
+
+    t.ok(ok);
+});
+
+
 test('getting coin objects for a transaction', async t => {
     const suiCoin = suiMaster.suiCoins.get('sui');
 
@@ -109,7 +127,6 @@ test('getting coin objects for a transaction', async t => {
     t.ok(nowBalance < wasBalance);  /// would be better to calculate everthing + fees + storage rebate, but let's just assume it works for now.
     // @todo : cover better
 });
-
 
 
 test('stops local test node', async t => {

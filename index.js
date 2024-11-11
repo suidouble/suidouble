@@ -4,7 +4,10 @@ import SuiTestScenario from './lib/SuiTestScenario.js';
 import SuiObject from './lib/SuiObject.js';
 import SuiUtils from './lib/SuiUtils.js';
 import SuiLocalTestValidator from './lib/SuiLocalTestValidator.js';
-import  { Transaction, Commands } from '@mysten/sui/transactions';
+import SuiMemoryObjectStorage from './lib/SuiMemoryObjectStorage.js';
+import SuiCoin from './lib/SuiCoin.js';
+import SuiCoins from './lib/SuiCoins.js';
+import { Transaction, Commands } from '@mysten/sui/transactions';
 import { bcs } from '@mysten/sui/bcs';
 
 const txInput = SuiUtils.txInput;
@@ -22,4 +25,7 @@ export {
     SuiUtils,
     txInput,
     bcs,
+    SuiMemoryObjectStorage,
+    SuiCoin,
+    SuiCoins,
 };
