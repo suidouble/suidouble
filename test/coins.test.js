@@ -35,13 +35,6 @@ test('type is normalized for SUI', async t => {
     const suiCoin5 = suiMaster.suiCoins.get('2::sui::SUI');
     const suiCoin6 = suiMaster.suiCoins.get('0000000000000000000000000000000000000000000000000000000000000002::sui::SUI');
 
-    console.log(suiCoin1.coinType);
-    console.log(suiCoin2.coinType);
-    console.log(suiCoin3.coinType);
-    console.log(suiCoin4.coinType);
-    console.log(suiCoin5.coinType);
-    console.log(suiCoin6.coinType);
-
     t.ok(suiCoin1.coinType == suiCoin2.coinType);
     t.ok(suiCoin1.coinType == suiCoin3.coinType);
     t.ok(suiCoin1.coinType == suiCoin4.coinType);
@@ -69,11 +62,103 @@ test('string representation works ok', async t => {
     const toDisplay2 = suiCoin.amountToString(1); // 1 mist
     t.equal(toDisplay2, '0.000000001');
 
+    const toDisplay1000 = suiCoin.amountToString(1000); // 1000 mist
+    t.equal(toDisplay1000, '0.000001');
+
     const toDisplay3 = suiCoin.amountToString(suiMaster.MIST_PER_SUI * BigInt(1000) + BigInt(1)); // 1000 SUI + 1 mist
     t.equal(toDisplay3, '1000.000000001');
 
     const toDisplay4 = suiCoin.amountToString(suiMaster.MIST_PER_SUI * BigInt(1000) - BigInt(1)); // 1000 SUI - 1 mist
     t.equal(toDisplay4, '999.999999999');
+});
+
+
+test('string representation (withAbbr) works ok', async t => {
+    const suiCoin = suiMaster.suiCoins.get('sui');
+    await suiCoin.getMetadata();
+
+    // it should dispaly the same on the low amounts:
+
+    const toDisplay1 = suiCoin.amountToString(suiMaster.MIST_PER_SUI, {withAbbr: true});
+    t.equal(toDisplay1, '1.0');
+
+    const toDisplay2 = suiCoin.amountToString(1, {withAbbr: true}); // 1 mist
+    t.equal(toDisplay2, '0.000000001');
+
+    const toDisplay1000 = suiCoin.amountToString(1000, {withAbbr: true}); // 1000 mist
+    t.equal(toDisplay1000, '0.000001');
+
+    const toDisplay3 = suiCoin.amountToString(suiMaster.MIST_PER_SUI * BigInt(1000) + BigInt(1), {withAbbr: true}); // 1000 SUI + 1 mist
+    t.equal(toDisplay3, '1000.000000001');
+
+    const toDisplay4 = suiCoin.amountToString(suiMaster.MIST_PER_SUI * BigInt(1000) - BigInt(1), {withAbbr: true}); // 1000 SUI - 1 mist
+    t.equal(toDisplay4, '999.999999999');
+
+    // things are getting interesting starting from '1001.0'
+
+    const toDisplayK1 = suiCoin.amountToString(suiMaster.MIST_PER_SUI * BigInt(1001) + BigInt(1), {withAbbr: true}); // 1000 SUI + 1 mist
+    t.equal(toDisplayK1, '1.001K');
+    const toDisplayK2 = suiCoin.amountToString(suiMaster.MIST_PER_SUI * BigInt(2000), {withAbbr: true}); 
+    t.equal(toDisplayK2, '2.000K');
+    const toDisplayK3 = suiCoin.amountToString(suiMaster.MIST_PER_SUI * BigInt(999900), {withAbbr: true}); 
+    t.equal(toDisplayK3, '999.900K');
+
+    const toDisplayM1 = suiCoin.amountToString(suiMaster.MIST_PER_SUI * BigInt(1000000) + BigInt(1), {withAbbr: true}); // 1000 SUI + 1 mist
+    t.equal(toDisplayM1, '1.000M');
+    const toDisplayM2 = suiCoin.amountToString(suiMaster.MIST_PER_SUI * BigInt(2000000) + BigInt(900), {withAbbr: true}); // 1000 SUI + 1 mist
+    t.equal(toDisplayM2, '2.000M');
+
+    const toDisplayB1 = suiCoin.amountToString(suiMaster.MIST_PER_SUI * BigInt(1000000000) + BigInt(1), {withAbbr: true}); // 1000 SUI + 1 mist
+    t.equal(toDisplayB1, '1.000B');
+
+    const toDisplayT1 = suiCoin.amountToString(suiMaster.MIST_PER_SUI * BigInt(1000000000000) + BigInt(1), {withAbbr: true}); // 1000 SUI + 1 mist
+    t.equal(toDisplayT1, '1.000T');
+});
+
+
+test('string representation (separateThousands) works ok', async t => {
+    const suiCoin = suiMaster.suiCoins.get('sui');
+    await suiCoin.getMetadata();
+
+    // it should dispaly the same on the low amounts:
+
+    const toDisplay1 = suiCoin.amountToString(suiMaster.MIST_PER_SUI, {separateThousands: true});
+    t.equal(toDisplay1, '1.0');
+
+    const toDisplay2 = suiCoin.amountToString(1, {separateThousands: true}); // 1 mist
+    t.equal(toDisplay2, '0.000000001');
+
+    const toDisplay1000 = suiCoin.amountToString(1000, {separateThousands: true}); // 1000 mist
+    t.equal(toDisplay1000, '0.000001');
+
+    const toDisplay3 = suiCoin.amountToString(suiMaster.MIST_PER_SUI * BigInt(1000) + BigInt(1), {separateThousands: true}); // 1000 SUI + 1 mist
+    t.equal(toDisplay3, '1,000.000000001');
+
+    const toDisplay4 = suiCoin.amountToString(suiMaster.MIST_PER_SUI * BigInt(1000) - BigInt(1), {separateThousands: true}); // 1000 SUI - 1 mist
+    t.equal(toDisplay4, '999.999999999');
+
+    // things are getting interesting starting from '1001.0'
+
+    const toDisplayK1 = suiCoin.amountToString(suiMaster.MIST_PER_SUI * BigInt(1001) + BigInt(1), {separateThousands: true});
+    t.equal(toDisplayK1, '1,001.000000001');
+    const toDisplayK2 = suiCoin.amountToString(suiMaster.MIST_PER_SUI * BigInt(2000), {separateThousands: true}); 
+    t.equal(toDisplayK2, '2,000.0');
+    const toDisplayK3 = suiCoin.amountToString(suiMaster.MIST_PER_SUI * BigInt(999900), {separateThousands: true}); 
+    t.equal(toDisplayK3, '999,900.0');
+
+    const toDisplayM1 = suiCoin.amountToString(suiMaster.MIST_PER_SUI * BigInt(1000000) + BigInt(1), {separateThousands: true});
+    t.equal(toDisplayM1, '1,000,000.000000001');
+    const toDisplayM2 = suiCoin.amountToString(suiMaster.MIST_PER_SUI * BigInt(2000000) + BigInt(900), {separateThousands: true}); 
+    t.equal(toDisplayM2, '2,000,000.0000009');
+
+    const toDisplayB1 = suiCoin.amountToString(suiMaster.MIST_PER_SUI * BigInt(1000000000) + BigInt(1), {separateThousands: true}); 
+    t.equal(toDisplayB1, '1,000,000,000.000000001');
+
+    const toDisplayT1 = suiCoin.amountToString(suiMaster.MIST_PER_SUI * BigInt(1000000000000) + BigInt(1), {separateThousands: true}); 
+    t.equal(toDisplayT1, '1,000,000,000,000.000000001');
+
+    const toDisplayT1q = suiCoin.amountToString(suiMaster.MIST_PER_SUI * BigInt(1000000000000) + BigInt(1), {separateThousands: ' '}); 
+    t.equal(toDisplayT1q, '1 000 000 000 000.000000001');
 });
 
 test('you have no SUI on the fresh node', async t => {
