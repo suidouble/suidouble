@@ -108,11 +108,27 @@ test('string representation (withAbbr) works ok', async t => {
     const toDisplayM2 = suiCoin.amountToString(suiMaster.MIST_PER_SUI * BigInt(2000000) + BigInt(900), {withAbbr: true}); // 1000 SUI + 1 mist
     t.equal(toDisplayM2, '2.000M');
 
+    const toDisplayM2spec = suiCoin.amountToString(148518424765531477n, {withAbbr: true}); // 1000 SUI + 1 mist
+    t.equal(toDisplayM2spec, '148.518M');
+    
+
     const toDisplayB1 = suiCoin.amountToString(suiMaster.MIST_PER_SUI * BigInt(1000000000) + BigInt(1), {withAbbr: true}); // 1000 SUI + 1 mist
     t.equal(toDisplayB1, '1.000B');
 
+    const toDisplayB2spec = suiCoin.amountToString(148518424765531477000n, {withAbbr: true}); // 1000 SUI + 1 mist
+    t.equal(toDisplayB2spec, '148.518B');
+
     const toDisplayT1 = suiCoin.amountToString(suiMaster.MIST_PER_SUI * BigInt(1000000000000) + BigInt(1), {withAbbr: true}); // 1000 SUI + 1 mist
     t.equal(toDisplayT1, '1.000T');
+
+    const toDisplayT2spec = suiCoin.amountToString(148518424765531477000000n, {withAbbr: true}); // 1000 SUI + 1 mist
+    t.equal(toDisplayT2spec, '148.518T');
+
+    const toDisplayT20spec = suiCoin.amountToString(148518424765531477000000000n, {withAbbr: true}); // 1000 SUI + 1 mist
+    t.equal(toDisplayT20spec, '148518.424T');
+
+    const toDisplayT20spec2 = suiCoin.amountToString(148518424765531477000000000n, {withAbbr: true, separateThousands: true}); // 1000 SUI + 1 mist
+    t.equal(toDisplayT20spec2, '148,518.424T');
 });
 
 
