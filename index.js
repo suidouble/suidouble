@@ -7,6 +7,7 @@ import SuiLocalTestValidator from './lib/SuiLocalTestValidator.js';
 import SuiMemoryObjectStorage from './lib/SuiMemoryObjectStorage.js';
 import SuiCoin from './lib/SuiCoin.js';
 import SuiCoins from './lib/SuiCoins.js';
+import SuiPaginatedResponse from './lib/SuiPaginatedResponse.js';
 import { Transaction, Commands } from '@mysten/sui/transactions';
 import { bcs } from '@mysten/sui/bcs';
 
@@ -28,4 +29,5 @@ export {
     SuiMemoryObjectStorage,
     SuiCoin,
     SuiCoins,
+    SuiPaginatedResponse,
 };
