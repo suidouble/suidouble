@@ -86,6 +86,8 @@ test('attach a local package', async t => {
     t.not(contract.address, contractAddressV1);
     t.equal(contract.version, 2);
 
+    await new Promise((res)=>setTimeout(res, 1000)); // wait for upgrade in rpc
+
     contractAddressV2 = contract.address;
 
     // let's quickly check it worked, there should be event ChatShopCreated created and we can fetch it from contract's module
@@ -259,7 +261,7 @@ test('testing paginatedResponse', async t => {
     const moveCallResult = await contract.moveCall('suidouble_chat', 'fill', [chatTopMessage.id, contract.arg('string', 'the message response'), contract.arg('string', 'metadata')]);
     t.ok(moveCallResult.created.length >= 60); // it's 60 in move code, but let's keep chat flexible
 
-    const eventsResponse = await contract.fetchEvents('suidouble_chat');
+    const eventsResponse = await contract.modules.suidouble_chat.fetchEvents({eventTypeName: 'ChatResponseCreated'});
     const idsInEventsDict = {};
     let responsesInEventsCount = 0;
     do {
@@ -274,7 +276,7 @@ test('testing paginatedResponse', async t => {
     t.ok(responsesInEventsCount >= 60); // it's 60 in move code, but let's keep chat flexible
 
     // or using SuiPaginatedResponse forEach itterator:
-    const anotherEventsResponse = await contract.fetchEvents('suidouble_chat');
+    const anotherEventsResponse = await contract.modules.suidouble_chat.fetchEvents({eventTypeName: 'ChatResponseCreated'});
     let loopsInForEach = 0;
     const idsInLoopDict = {};
     await anotherEventsResponse.forEach(async (event)=>{ // 
