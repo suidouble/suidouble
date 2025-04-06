@@ -339,6 +339,17 @@ await package.publish();
 console.log('published as', package.address);
 ```
 
+Optionally, you can switch sui's env of `sui client switch` for the build (useful for Automated Address Management of dependencies via their Move.lock)
+
+```javascript
+const package = suiMaster.addPackage({
+    path: '../path_to_move_project_root/',
+});
+await package.build({ env: 'testnet', });
+await package.publish();
+
+```
+
 ### upgrading the package
 
 Same, it's for CLI as it re-builds the package.
