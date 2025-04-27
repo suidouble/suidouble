@@ -39,17 +39,17 @@ test('initialization', async t => {
 
     t.ok(gotAdapters.length > 0);
 
-    const suiWalletAdapter = gotAdapters.find((adapter)=>(adapter.name == 'Sui Wallet')); // there're few, but lets test one
+    const suietWalletAdapter = gotAdapters.find((adapter)=>(adapter.name == 'Suiet')); // there're few, but lets test one
 
-    t.ok(suiWalletAdapter);
+    t.ok(suietWalletAdapter);
 
-    t.equal(suiWalletAdapter.name, 'Sui Wallet');
-    t.ok(!suiWalletAdapter.isInstalled);
-    t.ok(suiWalletAdapter.icon);
-    t.ok(suiWalletAdapter.icon.indexOf('data:image/') != -1); // icon is data-url
+    t.equal(suietWalletAdapter.name, 'Suiet');
+    t.ok(!suietWalletAdapter.isInstalled);
+    t.ok(suietWalletAdapter.icon);
+    t.ok(suietWalletAdapter.icon.indexOf('data:image/') != -1); // icon is data-url
 
-    t.ok(suiWalletAdapter.getDownloadURL()); // url to install extension
-    t.ok(suiWalletAdapter.getDownloadURL().indexOf('https://') != -1);
+    t.ok(suietWalletAdapter.getDownloadURL()); // url to install extension
+    t.ok(suietWalletAdapter.getDownloadURL().indexOf('https://') != -1);
 
     // we can get instance of suiMaster out of suiInBrowser even if we are not connected to wallet
     // it will work without signer, but you can read data from chain
