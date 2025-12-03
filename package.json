@@ -1,6 +1,6 @@
 {
   "name": "suidouble",
-  "version": "1.45.0",
+  "version": "1.45.2",
   "description": "Set of provider, package and object classes for javascript representation of Sui Move smart contracts. Use same code for publishing, upgrading, integration testing, interaction with smart contracts and integration in browser web3 dapps",
   "main": "index.js",
   "type": "module",
@@ -23,7 +23,7 @@
   "license": "Apache-2.0",
   "dependencies": {
     "@mysten/bcs": "^1.9.2",
-    "@mysten/sui": "^1.45.0",
+    "@mysten/sui": "^1.45.2",
     "@polymedia/coinmeta": "^0.0.17",
     "@scure/bip39": "^1.6.0",
     "@wallet-standard/core": "^1.1.1",
