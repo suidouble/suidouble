@@ -27,25 +27,25 @@ module different_types::different_types {
         })
     }
 
-    public entry fun put_u8(store: &mut Store, value: u8, _ctx: &mut TxContext) {
+    public fun put_u8(store: &mut Store, value: u8, _ctx: &mut TxContext) {
         store.numbers = store.numbers + (value as u256);
     }
-    public entry fun put_u16(store: &mut Store, value: u16, _ctx: &mut TxContext) {
+    public fun put_u16(store: &mut Store, value: u16, _ctx: &mut TxContext) {
         store.numbers = store.numbers + (value as u256);
     }
-    public entry fun put_u32(store: &mut Store, value: u32, _ctx: &mut TxContext) {
+    public fun put_u32(store: &mut Store, value: u32, _ctx: &mut TxContext) {
         store.numbers = store.numbers + (value as u256);
     }
-    public entry fun put_u64(store: &mut Store, value: u64, _ctx: &mut TxContext) {
+    public fun put_u64(store: &mut Store, value: u64, _ctx: &mut TxContext) {
         store.numbers = store.numbers + (value as u256);
     }
-    public entry fun put_u128(store: &mut Store, value: u128, _ctx: &mut TxContext) {
+    public fun put_u128(store: &mut Store, value: u128, _ctx: &mut TxContext) {
         store.numbers = store.numbers + (value as u256);
     }
-    public entry fun put_u256(store: &mut Store, value: u256, _ctx: &mut TxContext) {
+    public fun put_u256(store: &mut Store, value: u256, _ctx: &mut TxContext) {
         store.numbers = store.numbers + (value as u256);
     }
-    public entry fun put_vector_u16(store: &mut Store, value: vector<u16>, _ctx: &mut TxContext) {
+    public fun put_vector_u16(store: &mut Store, value: vector<u16>, _ctx: &mut TxContext) {
         let vec_length = vector::length(&value);
         let mut i = 0;
         while (i < vec_length) {
@@ -54,18 +54,18 @@ module different_types::different_types {
             i = i + 1;
         };
     }
-    public entry fun put_address(store: &mut Store, value: address, _ctx: &mut TxContext) {
+    public fun put_address(store: &mut Store, value: address, _ctx: &mut TxContext) {
         store.v_address = value;
     }
-    public entry fun put_bool(store: &mut Store, value: bool, _ctx: &mut TxContext) {
+    public fun put_bool(store: &mut Store, value: bool, _ctx: &mut TxContext) {
         store.v_bool = value;
     }
-    public entry fun put_string(store: &mut Store, value: String, _ctx: &mut TxContext) {
+    public fun put_string(store: &mut Store, value: String, _ctx: &mut TxContext) {
         store.v_string = value;
     }
 
-    public entry fun put_type<T>(store: &mut Store, _ctx: &mut TxContext) {
-        let typen = type_name::get<T>();
+    public fun put_type<T>(store: &mut Store, _ctx: &mut TxContext) {
+        let typen = type_name::with_defining_ids<T>();
         let type_as_string = typen.into_string(); // returns ascii string
 
         store.v_string = string::from_ascii(type_as_string);

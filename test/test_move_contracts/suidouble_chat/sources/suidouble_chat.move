@@ -93,7 +93,7 @@ module suidouble_chat::suidouble_chat {
     // }
 
     /// Mint (post) a ChatTopMessage object without referencing another object.
-    public entry fun post(
+    public fun post(
         chat_shop: &ChatShop,
         text: vector<u8>,
         metadata: vector<u8>,
@@ -128,7 +128,7 @@ module suidouble_chat::suidouble_chat {
     }
 
     /// Mint (post) a ChatTopMessage object without referencing another object.
-    public entry fun post_pay(
+    public fun post_pay(
         chat_shop: &mut ChatShop,
         sui: Coin<SUI>,
         text: vector<u8>,
@@ -169,7 +169,7 @@ module suidouble_chat::suidouble_chat {
         transfer::share_object(chat_top_message);
     }
 
-    public entry fun post_pay_with_coin_vector(
+    public fun post_pay_with_coin_vector(
         chat_shop: &mut ChatShop,
         coins: vector<Coin<SUI>>,
         text: vector<u8>,
@@ -182,7 +182,8 @@ module suidouble_chat::suidouble_chat {
     }
 
     /// Mint (post) a ChatResponse object 
-    public entry fun reply(
+    #[allow(lint(self_transfer))]
+    public fun reply(
         chat_top_message: &mut ChatTopMessage,
         text: vector<u8>,
         metadata: vector<u8>,
@@ -215,7 +216,7 @@ module suidouble_chat::suidouble_chat {
     }
     
     /// Permanently delete `ChatResponse`
-    public entry fun burn_response(chat_response: ChatResponse, _: &mut TxContext) {
+    public fun burn_response(chat_response: ChatResponse, _: &mut TxContext) {
         let ChatResponse { id, chat_top_message_id: _, author: _, text: _, metadata: _, seq_n: _ } = chat_response;
         object::delete(id)
     }
@@ -260,7 +261,8 @@ module suidouble_chat::suidouble_chat {
     // }
 
     /// Mint a lot of responses (we need this to unit test SuiPaginatedResponse faster)
-    public entry fun fill(
+    #[allow(lint(self_transfer))]
+    public fun fill(
         chat_top_message: &mut ChatTopMessage,
         text: vector<u8>,
         metadata: vector<u8>,
@@ -336,7 +338,6 @@ module suidouble_chat::suidouble_chat {
             let chat_top_message = test_scenario::take_shared<ChatTopMessage>(scenario);
             // let chat_shop_ref = &chat_shop;
             debug::print(&chat_top_message);
-            debug::print(&mut chat_top_message);
 
             // let chat_top_message_ref = &chat_top_message;
             reply(&mut chat_top_message, b"response", b"metadata", test_scenario::ctx(scenario));
@@ -368,7 +369,7 @@ module suidouble_chat::suidouble_chat {
             // let chat_top_message = test_scenario::take_from_sender<ChatTopMessage>(scenario);
             let chat_top_message = test_scenario::take_shared<ChatTopMessage>(scenario);
             // let chat_shop_ref = &chat_shop;
-            debug::print(&mut chat_top_message);
+            debug::print(&chat_top_message);
 
             // let chat_top_message_ref = &chat_top_message;
             reply(&mut chat_top_message, b"response", b"metadata", test_scenario::ctx(scenario));
