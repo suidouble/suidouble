@@ -8,7 +8,7 @@ import SuiMemoryObjectStorage from './lib/SuiMemoryObjectStorage.js';
 import SuiCoin from './lib/SuiCoin.js';
 import SuiCoins from './lib/SuiCoins.js';
 import SuiPaginatedResponse from './lib/SuiPaginatedResponse.js';
-import { Transaction, Commands } from '@mysten/sui/transactions';
+import { Transaction, TransactionCommands as Commands } from '@mysten/sui/transactions';
 import { bcs } from '@mysten/sui/bcs';
 
 const txInput = SuiUtils.txInput;
