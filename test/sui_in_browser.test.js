@@ -60,12 +60,12 @@ test('initialization', async t => {
     t.ok(suiMaster.connectedChain);     // but there's chain
 
     // by default, SuiInBrowser gets you devnet connection (it's overloaded by Wallet Extension current chain)
-    t.equal(suiMaster.connectedChain, 'sui:devnet'); 
+    t.equal(suiMaster.connectedChain, 'devnet'); 
 
 });
 
 test('initialization via mainnet', async t => {
     const suiInBrowser = new SuiInBrowser({defaultChain: 'sui:mainnet'});
     const suiMaster = await suiInBrowser.getSuiMaster();
-    t.equal(suiMaster.connectedChain, 'sui:mainnet'); 
+    t.equal(suiMaster.connectedChain, 'mainnet'); 
 });

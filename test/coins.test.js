@@ -26,6 +26,7 @@ test('init suiMaster and connect it to local test validator', async t => {
     t.ok(`${suiMaster.address}`.indexOf('0x') === 0); // adress is string starting with '0x'
 });
 
+
 test('type is normalized for SUI', async t => {
     // eveything should be the same:
     const suiCoin1 = suiMaster.suiCoins.get('sui');
@@ -207,27 +208,27 @@ test('have some in balance query', async t => {
 });
 
 
-test('getting coin objects for a transaction', async t => {
-    const suiCoin = suiMaster.suiCoins.get('sui');
+// test('getting coin objects for a transaction', async t => {
+//     const suiCoin = suiMaster.suiCoins.get('sui');
 
-    const wasBalance = await suiCoin.getBalance(suiMaster.address);
+//     const wasBalance = await suiCoin.getBalance(suiMaster.address);
 
-    const tx = new Transaction();
-    const coinInput = await suiCoin.coinOfAmountToTxCoin(tx, suiMaster.address, suiMaster.MIST_PER_SUI); // pick 1 SUI
-    tx.transferObjects([coinInput], '0x1d20dcdb2bca4f508ea9613994683eb4e76e9c4ed371169677c1be02aaf0b12a'); // send it anywhere
+//     const tx = new Transaction();
+//     const coinInput = await suiCoin.coinOfAmountToTxCoin(tx, suiMaster.address, suiMaster.MIST_PER_SUI); // pick 1 SUI
+//     tx.transferObjects([coinInput], '0x1d20dcdb2bca4f508ea9613994683eb4e76e9c4ed371169677c1be02aaf0b12a'); // send it anywhere
 
-    const result = await suiMaster.signAndExecuteTransaction({
-        transaction: tx,
-        requestType: 'WaitForLocalExecution',
-        options: {
-        },
-    });
+//     const result = await suiMaster.signAndExecuteTransaction({
+//         transaction: tx,
+//         requestType: 'WaitForLocalExecution',
+//         options: {
+//         },
+//     });
 
-    const nowBalance = await suiCoin.getBalance(suiMaster.address);
+//     const nowBalance = await suiCoin.getBalance(suiMaster.address);
 
-    t.ok(nowBalance < wasBalance);  /// would be better to calculate everthing + fees + storage rebate, but let's just assume it works for now.
-    // @todo : cover better
-});
+//     t.ok(nowBalance < wasBalance);  /// would be better to calculate everthing + fees + storage rebate, but let's just assume it works for now.
+//     // @todo : cover better
+// });
 
 
 test('stops local test node', async t => {

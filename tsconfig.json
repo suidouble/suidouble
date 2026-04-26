@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "allowJs": true,
+    "declaration": true,
+    "emitDeclarationOnly": true,
+    "declarationDir": "./types",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "target": "ES2020",
+    "strict": false,
+    "skipLibCheck": true,
+    "checkJs": false
+  },
+  "include": ["index.js", "lib/*.js"]
+}
