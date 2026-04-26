@@ -1,12 +1,21 @@
 {
   "name": "suidouble",
-  "version": "2.5.0",
-  "description": "Set of provider, package and object classes for javascript representation of Sui Move smart contracts. Use same code for publishing, upgrading, integration testing, interaction with smart contracts and integration in browser web3 dapps",
+  "version": "2.16.0",
+  "description": "JavaScript library for Sui Move smart contracts. Publish, upgrade, and test packages; call contract methods; query objects and events — same code works on Node.js and in the browser.",
   "main": "index.js",
+  "types": "types/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./types/index.d.ts",
+      "default": "./index.js"
+    }
+  },
   "type": "module",
   "scripts": {
     "test": "tap -j1 -t120 ./test/*.test.js",
-    "coverage": "tap -j1 -t120 ./test/*.test.js"
+    "typecheck": "npx tsc --noEmit --checkJs",
+    "build:types": "npx tsc",
+    "prepublishOnly": "npx tsc"
   },
   "keywords": [
     "sui",
@@ -14,28 +23,35 @@
     "move",
     "smart contract",
     "smart contracts",
-    "sui.js",
+    "blockchain",
     "web3",
-    "dapps",
-    "dapp"
+    "dapp",
+    "grpc",
+    "graphql"
   ],
   "author": "suidouble (https://github.com/suidouble)",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/suidouble/suidouble.git"
+  },
   "license": "Apache-2.0",
   "dependencies": {
-    "@mysten/bcs": "^2.0.2",
-    "@mysten/sui": "^2.5.0",
+    "@mysten/bcs": "^2.0.3",
+    "@mysten/sui": "^2.16.0",
     "@polymedia/coinmeta": "^0.0.24",
     "@scure/bip39": "^1.6.0",
-    "@wallet-standard/core": "^1.1.1",
-    "websocket": "^1.0.35"
+    "@wallet-standard/core": "^1.1.1"
   },
   "devDependencies": {
-    "tap": "^21.5.0"
+    "tap": "^21.5.0",
+    "typescript": "^5.9.3"
+  },
+  "engines": {
+    "node": ">=18"
   },
   "browser": {
     "child_process": false,
     "fs": false,
     "path": false
-  },
-  "tap": {}
+  }
 }

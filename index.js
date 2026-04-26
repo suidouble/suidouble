@@ -1,6 +1,5 @@
 import SuiMaster from './lib/SuiMaster.js';
 import SuiInBrowser from './lib/SuiInBrowser.js';
-import SuiTestScenario from './lib/SuiTestScenario.js';
 import SuiObject from './lib/SuiObject.js';
 import SuiUtils from './lib/SuiUtils.js';
 import SuiLocalTestValidator from './lib/SuiLocalTestValidator.js';
@@ -18,7 +17,6 @@ export {
     SuiMaster,
     SuiObject,
     SuiInBrowser,
-    SuiTestScenario,
     SuiLocalTestValidator,
     MIST_PER_SUI,
     Transaction,

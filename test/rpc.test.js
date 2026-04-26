@@ -14,12 +14,9 @@ const __dirname = path.dirname(__filename);
 let suiMaster = null;
 
 test('spawn local test node', async t => {
-        const rpcClient = SuiMaster.SuiUtils.suiClientForRPC({
-                chain: 'mainnet',
-                url: 'https://fullnode.mainnet.sui.io',
-                rpc: {
-                    // headers: {"x-allthatnode-api-key": "xxxxxxxxxx"},
-                }
+        const rpcClient = SuiMaster.SuiUtils.suiClientForRPC('mainnet', {
+                baseUrl: 'https://fullnode.mainnet.sui.io:443',
+                // fetchInit: { headers: { "x-allthatnode-api-key": "xxxxxxxxxx" } },
             });
             
         const suiMaster = new SuiMaster({

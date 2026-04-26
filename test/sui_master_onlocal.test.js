@@ -199,24 +199,21 @@ test('execute contract methods', async t => {
     // by suidouble_chat contract design, ChatTopMessage is an object representing a thread,
     // it always has at least one ChatResponse (with text of the very first message in thread)
     let foundChatTopMessage = null;
-    let foundChatResponse = null;
-    let foundText = null;
+    let foundChatResponseObj = null;
     moveCallResult.created.forEach((obj)=>{
         if (obj.typeName == 'ChatTopMessage') {
             foundChatTopMessage = true;
         }
         if (obj.typeName == 'ChatResponse') {
-            foundChatResponse = true;
-            foundText = obj.fields.text;
+            foundChatResponseObj = obj;
         }
     });
 
     t.ok(foundChatTopMessage);
-    t.ok(foundChatResponse);
-    
-    // messageTextAsBytes = [].slice.call(new TextEncoder().encode(messageText)); // regular array with utf data
-    // suidouble_chat contract store text a bytes (easier to work with unicode things), let's convert it back to js string
-    foundText = new TextDecoder().decode(new Uint8Array(foundText));
+    t.ok(foundChatResponseObj);
+
+    await foundChatResponseObj.fetchFields();
+    const foundText = suiMaster.utils.bytesFieldToString(foundChatResponseObj.fields.text);
 
     t.equal(foundText, 'the message');
 
@@ -238,17 +235,16 @@ test('execute contract methods', async t => {
     // there're at least some object created
     t.ok(moveCallResult2.created.length > 0);
 
-    let responseText = null;
+    let responseObj = null;
     moveCallResult2.created.forEach((obj)=>{
         if (obj.typeName == 'ChatResponse') {
-            responseText = obj.fields.text;
-
+            responseObj = obj;
             chatResponseToDelete = obj.id; // ChatResponse is moved to be owned by author, so we can store id to try burn_response later
         }
     });
-    // messageTextAsBytes = [].slice.call(new TextEncoder().encode(messageText)); // regular array with utf data
-    // suidouble_chat contract store text a bytes (easier to work with unicode things), let's convert it back to js string
-    responseText = new TextDecoder().decode(new Uint8Array(responseText));
+
+    await responseObj.fetchFields();
+    const responseText = suiMaster.utils.bytesFieldToString(responseObj.fields.text);
 
     t.equal(responseText, 'ขอบคุณครับ, 🇺🇦');
 });
@@ -260,6 +256,9 @@ test('testing paginatedResponse', async t => {
     // fill method create a lot of responses ( check out contract's code )
     const moveCallResult = await contract.moveCall('suidouble_chat', 'fill', [chatTopMessage.id, contract.arg('string', 'the message response'), contract.arg('string', 'metadata')]);
     t.ok(moveCallResult.created.length >= 60); // it's 60 in move code, but let's keep chat flexible
+
+    // GraphQL indexer processes events asynchronously — wait for it to catch up
+    await new Promise((res) => setTimeout(res, 1000));
 
     const eventsResponse = await contract.modules.suidouble_chat.fetchEvents({eventTypeName: 'ChatResponseCreated'});
     const idsInEventsDict = {};
@@ -292,7 +291,6 @@ test('testing paginatedResponse', async t => {
 
 test('find owned module objects with query', async t => {
     const module = await contract.getModule('suidouble_chat');
-    await module.getNormalizedMoveFunction('fill');
 
     const paginatedResponse = await module.getOwnedObjects();
 
@@ -342,22 +340,21 @@ test('testing move call with coins', async t => {
     // by suidouble_chat contract design, ChatTopMessage is an object representing a thread,
     // it always has at least one ChatResponse (with text of the very first message in thread)
     let foundChatTopMessage = null;
-    let foundChatResponse = null;
-    let foundText = null;
+    let foundChatResponseObj2 = null;
     moveCallResult.created.forEach((obj)=>{
         if (obj.typeName == 'ChatTopMessage') {
             foundChatTopMessage = true;
         }
         if (obj.typeName == 'ChatResponse') {
-            foundChatResponse = true;
-            foundText = obj.fields.text;
+            foundChatResponseObj2 = obj;
         }
     });
 
     t.ok(foundChatTopMessage);
-    t.ok(foundChatResponse);
+    t.ok(foundChatResponseObj2);
 
-    foundText = new TextDecoder().decode(new Uint8Array(foundText));
+    await foundChatResponseObj2.fetchFields();
+    const foundText = suiMaster.utils.bytesFieldToString(foundChatResponseObj2.fields.text);
 
     t.equal(foundText, longMessageYouCanNotPostForFree);
 
@@ -377,6 +374,71 @@ test('testing move call with vector<Coin<..>>', async t => {
 
     const balanceNow = await suiMaster.getBalance();
     t.ok( balanceNow <= (balanceWas - 400000000000n) ); // vector<Coin<SUI>> paid
+});
+
+test('getUpgradeCapId — returns a 0x-prefixed id string', async t => {
+    const upgradeCapId = await contract.getUpgradeCapId();
+
+    t.ok(upgradeCapId, 'upgradeCapId is truthy');
+    t.equal(typeof upgradeCapId, 'string', 'upgradeCapId is a string');
+    t.ok(upgradeCapId.startsWith('0x'), 'upgradeCapId starts with 0x');
+
+    // calling again should return the same cached value
+    const upgradeCapId2 = await contract.getUpgradeCapId();
+    t.equal(upgradeCapId, upgradeCapId2, 'second call returns the same id (cached)');
+});
+
+test('contract.fetchEvents — package-scope returns events from all modules', async t => {
+    const packageEvents = await contract.fetchEvents();
+
+    t.ok(Array.isArray(packageEvents.data), 'data is an array');
+    t.ok(packageEvents.data.length > 0, 'at least one event found at package scope');
+
+    // should include at least ChatShopCreated emitted at publish time
+    let foundChatShopCreated = false;
+    for (const event of packageEvents.data) {
+        t.ok(event.isSuiEvent, 'each event has isSuiEvent brand');
+        t.ok(typeof event.type === 'string' && event.type.length > 0, 'each event has a type');
+        t.ok(event.type.split('::').length >= 3, 'event type is fully qualified');
+        if (event.typeName === 'ChatShopCreated') {
+            foundChatShopCreated = true;
+        }
+    }
+    t.ok(foundChatShopCreated, 'ChatShopCreated event present at package scope');
+
+    // module-scoped fetchEvents should return a subset of package-scoped events
+    const moduleEvents = await contract.modules.suidouble_chat.fetchEvents();
+    t.ok(moduleEvents.data.length <= packageEvents.data.length, 'module events ≤ package events');
+});
+
+test('SuiObject.fetchTransactions — transaction history via GraphQL', async t => {
+    // use the most recently created ChatTopMessage, which has been touched by at least
+    // the post() call and possibly the fill() call in the paginatedResponse test
+    const chatTopMessage = contract.objectStorage.findMostRecentByTypeName('ChatTopMessage');
+    t.ok(chatTopMessage, 'found a ChatTopMessage in objectStorage');
+
+    // GraphQL indexer processes transactions asynchronously — wait for it to catch up
+    await new Promise((res) => setTimeout(res, 1000));
+
+    const txResponse = await chatTopMessage.fetchTransactions({ limit: 20 });
+
+    t.ok(Array.isArray(txResponse.data), 'data is an array');
+    t.ok(txResponse.data.length > 0, 'at least one transaction touched the ChatTopMessage');
+
+    for (const tx of txResponse.data) {
+        t.ok(typeof tx.digest === 'string' && tx.digest.length > 0, 'each tx has a digest');
+        t.ok(typeof tx.timestampMs === 'number' && tx.timestampMs > 0, 'each tx has a positive timestampMs');
+    }
+
+    // ascending order should give the oldest transaction first
+    const asc = await chatTopMessage.fetchTransactions({ limit: 20, order: 'asc' });
+    const desc = await chatTopMessage.fetchTransactions({ limit: 20, order: 'desc' });
+
+    t.ok(asc.data.length > 0, 'ascending query returns results');
+    t.ok(desc.data.length > 0, 'descending query returns results');
+
+    // first tx in ascending should be older than (or equal to) first tx in descending
+    t.ok(asc.data[0].timestampMs <= desc.data[0].timestampMs, 'ascending oldest ≤ descending newest');
 });
 
 test('testing move call deleting object', async t => {

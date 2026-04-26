@@ -1,23 +1,30 @@
 # suidouble
 
-Set of provider, package and object classes for javascript representation of Sui's smart contracts. Use same code for publishing, upgrading, integration testing, interaction with smart contracts and integration in browser dapps. Very alpha for now.
+Set of provider, package and object classes for JavaScript representation of Sui Move smart contracts. Use the same code for publishing, upgrading, integration testing, interacting with contracts, and building browser dApps.
 
 - [Installation](#installation)
 - [Usage](#usage)
     - [Connecting](#connecting)
     - [Attaching a package](#attaching-a-package)
     - [Interacting with smart contract](#interacting-with-smart-contract)
-    - [SuiObject](#suiobject)
-    - [Fetching objects](#fetching-objects)
-    - [Fetching Events](#fetching-events)
-    - [Subscribe to Events](#subscribing-to-events)
-    - [Executing smart contract method](#executing-smart-contract-method)
-    - [Sending sui / coins with smart contract methods](#sending-sui--coins-with-smart-contract-methods)
-    - [Composing transaction block yourself](#composing-transaction-block-yourself)
+        - [SuiObject](#suiobject)
+        - [Fetching events](#fetching-events)
+        - [Executing smart contract method](#executing-smart-contract-method)
+        - [Move method argument types](#move-method-argument-types)
+        - [Move methods with type parameters](#move-methods-with-type-parameters)
+        - [Sending SUI / coins](#sending-sui--coins-with-smart-contract-methods)
+        - [Composing a transaction yourself](#composing-a-transaction-yourself)
+        - [Fetching objects](#fetching-objects)
+        - [Fetching object fields](#fetching-object-fields)
+        - [Fetching objects by id](#fetching-objects-by-id)
+        - [Querying owned objects](#querying-owned-objects)
+        - [Fetching transaction history for an object](#fetching-transaction-history-for-an-object)
+        - [Resolving a Sui Name Service name](#resolving-a-sui-name-service-suins-name)
 - [Publishing the package](#publishing-the-package)
 - [Upgrading the package](#upgrading-the-package)
-- [Writing Sue Move intergration tests](#sui-move-integration-testing)
-- [Connecting web3 dapps to Sui](#sui-move-connect-in-browser)
+- [Writing Sui Move integration tests](#sui-move-integration-testing)
+- [Connecting web3 dApps to Sui](#sui-move-connect-in-browser)
+- [Unit tests](#unit-tests)
 - [Todo](#todo)
 
 ### Sample applications
@@ -51,29 +58,29 @@ You can initialize it directly, if you have keypair, secret phrase, or privateKe
 const suiMaster = new SuiMaster({
     keypair: Ed25519Keypair || Secp256r1Keypair || Secp256k1Keypair,
     debug: true,    // echo testing messages to console
-    client: 'test', // 'test', 'dev', 'local', 'main' or instance of this lib's SuiLocalTestValidator
+    client: 'testnet', // 'testnet', 'devnet', 'localnet', 'mainnet' or instance of this lib's SuiLocalTestValidator
 });
 const suiMaster = new SuiMaster({
     debug: false,
     privateKey: 'suiprivkey1qpwly9xrfsv50mqug706s40l58klez5q6mpchq4f5ldzktjyr4x7yhj9lf2',
-    client: 'dev', 
+    client: 'devnet', 
 });
 const suiMaster = new SuiMaster({
     debug: false,
     phrase: 'thrive mean two thrive mean two thrive mean two thrive mean two', // secret phrase to generate keypair
-    client: 'dev', 
+    client: 'devnet', 
 });
 const suiMaster = new SuiMaster({
     debug: false,
     phrase: 'thrive mean two thrive mean two thrive mean two thrive mean two', // secret phrase to generate keypair
     accountIndex: 1, // derive path index (you can generate few addresses with same seed phrase)
-    client: 'dev', 
+    client: 'devnet', 
 });
 const suiMaster = new SuiMaster({
     debug: false,
     phrase: 'thrive mean two thrive mean two thrive mean two thrive mean two', // secret phrase to generate keypair
-    keypairAlgo: 'secp256k1', // 'secp256r1' or 'secp256r1' or 'ed25519' default is ed25519
-    client: 'dev', 
+    keypairAlgo: 'secp256k1', // 'secp256k1' or 'secp256r1' or 'ed25519' default is ed25519
+    client: 'devnet', 
 });
 ```
 
@@ -119,7 +126,7 @@ const contract = suiMaster.addPackage({
 await contract.isOnChain();  
 ```
 
-Yes, it can find it's address on chain, by comparing Move's module names with package you own on chain. Works ok if you want to test upgrading or something. Also, you can attach the package only by modules names. This will work in browser too (note: you have to own this package, its UpgradeCap):
+Yes, it can find its address on chain, by comparing Move's module names with package you own on chain. Works ok if you want to test upgrading or something. Also, you can attach the package only by modules names. This will work in browser too (note: you have to own this package, its UpgradeCap):
 
 ```javascript
 const contract = suiMaster.addPackage({
@@ -132,7 +139,7 @@ await contract.isOnChain();
 
 ##### SuiObject
 
-Everyhing in Sui is an object. So is in suidouble. SuiObject's instance class follows:
+Everything in Sui is an object. So is in suidouble. SuiObject's instance class follows:
 
 ```javascript
 suiObject.id; // '0x10cded4f9df05e37b44e3be2ffa9004dec77786950719fad6083694fdca45bf2' or something
@@ -146,19 +153,15 @@ suiObject.fields;      // {}, object. Fields stored on blockchain
 suiObject.display;     // display object stored on blockchain
 suiObject.localProperties;  // {} object. Any local properties you want to attach to object. No interaction with blockchain. May be helpful to store some temp data
 suiObject.isOwnedBy('0x10cded4f9df05e37b44e3be2ffa9004dec77786950719fad6083694fdca45bf2'); // is object owned by somebody or some object
-/// past versions:
-await suiObject.getPastObject(version); // get instance of object from the past
-await suiObject.getPastObject(); // try to get previous
 /// object-related transactions:
-await suiObject.queryTransactionBlocks(); // returns instance of SuiPaginatedResponse
+await suiObject.fetchTransactions(); // returns instance of SuiPaginatedResponse
 ```
-
-@todo: better SuiObject documentation
 
 ##### fetching events
 
 ```javascript
-const events = await contract.fetchEvents('modulename', {eventTypeName: 'ChatResponseCreated', order: 'descending'});
+// fetch events for a specific module (all events or filtered by type):
+const events = await contract.modules.modulename.fetchEvents({eventTypeName: 'ChatResponseCreated', order: 'descending'});
 // events is instance of SuiPaginatedResponse. Data is stored in .data, has method to fetch next page - .nextPage();
 while (events.hasNextPage) {
     for (const event of events.data) {
@@ -168,153 +171,245 @@ while (events.hasNextPage) {
     }
     await events.nextPage();
 }
-// const events = await contract.fetchEvents('modulename', {order: 'descending'}); // or all module events
+// const events = await contract.modules.modulename.fetchEvents({order: 'descending'}); // all module events
+// const events = await contract.fetchEvents({order: 'descending'}); // all events across all modules in the package
 ```
-
-##### subscribing to events
-
-*** Subscribe to Events is deprecated in Sui SDK *** You should plan to use different architecture in your application.
 
 
 ##### executing smart contract method
 
-```javascript
-// executing method with parameters of (chat_shop: &ChatShop, metadata: vector<u8>, text: vector<u8>)
-const res = await contract.moveCall('chat', 'post', ['0x10cded4f9df05e37b44e3be2ffa9004dec77786950719fad6083694fdca45bf2', contract.arg('vector<u8>', [3,24,55]), contract.arg('string', 'anotherparam') ]);
-// or await contract.modules.chat.moveCall('methodname', ['somedata', [3,24,55], 'anotherparam']);
-    console.log(res);
-    for (const object of res.created) {
-        console.log('created', object.address, 'with type of', object.typeName); // instances of SuiObject (@todo: write documentation for it)
-    }
-    for (const object of res.mutated) {
-        console.log('mutated', object.address, 'with type of', object.typeName); 
-    }
-    for (const object of res.deleted) {
-        console.log('deleted', object.address, 'with type of', object.typeName, object.isDeleted);
-    }
-```
-
-##### move methods argumets types
-
-Sui forces you to specify argument type in SDK v1.0, so we are going to follow this paradigm. With few little helpers. Both `SuiPackage` and `SuiPackageModule` have methods to make Inputs.Pure with bcs for you based on the desired type, you can use for executing `suiPackage.moveCall` or `suiPackageModule.moveCall`:
+Both `SuiPackage` and `SuiPackageModule` expose a `moveCall` method. After execution the result is a `SuiTransaction` with `created`, `mutated`, and `deleted` arrays of `SuiObject` instances. Created and mutated objects are also pushed into `suiMaster.objectStorage` automatically.
 
 ```javascript
-const arguments = [];
-arguments.push(contract.arg('bool', true));
-arguments.push(contract.arg('u8', 222));
-arguments.push(contract.arg('u16', 2222));
-arguments.push(contract.arg('u32', 3333));
-arguments.push(contract.arg('u64', 4444));
-arguments.push(contract.arg('u128', 5555));
-arguments.push(contract.arg('u256', 6666));
-arguments.push(contract.arg('address', '0xd9a95d7cc137f71dd7766f02791536453062a7509e9f461620cc4f583b09134c'));
-arguments.push(contract.arg('string', 'some utf-8 💧string'));
-arguments.push(contract.arg('vector<u8>', [222,111,211])); // works for other vectors with primitive contents, e.g. u128, bool etc
+// via SuiPackage (module name is the first argument):
+const res = await contract.moveCall('suidouble_chat', 'post', [
+    '0x10cded4f9df05e37b44e3be2ffa9004dec77786950719fad6083694fdca45bf2', // object id string
+    contract.arg('string', 'hello'),
+    contract.arg('string', 'metadata'),
+]);
+
+// or directly via SuiPackageModule:
+const res = await contract.modules.suidouble_chat.moveCall('post', [
+    '0x10cded4f9df05e37b44e3be2ffa9004dec77786950719fad6083694fdca45bf2',
+    contract.arg('string', 'hello'),
+    contract.arg('string', 'metadata'),
+]);
+
+// inspect results — all SuiObject instances
+for (const object of res.created) {
+    // Note: fields are NOT populated from effects. Call fetchFields() first if you need them.
+    await object.fetchFields();
+    console.log('created', object.address, object.typeName, object.fields);
+}
+for (const object of res.mutated) {
+    console.log('mutated', object.address, object.typeName);
+}
+for (const object of res.deleted) {
+    console.log('deleted', object.address, object.isDeleted); // true
+}
 ```
 
-Take a look at unit test covering all types arguments [here](test/different_types_args.test.js)
-
-##### move methods typed arguments
-
-To specify types for move methods declared as:
-
-```rust
-public entry fun method<T>(...)
-```
-
-you can specify `typeArguments` as a 3rd parameter to `suiPackageModule.moveCall` or 4th to `suiPackage.moveCall`:
+The returned `SuiTransaction` also exposes transaction-level metadata:
 
 ```javascript
-await mod.moveCall('test_method', [ store.id ], [ '0xca90beae66f23df1a830357c92e0a4348b6164d142c96b06936c5f28fdeaa99f::different_types::Store' ]);
-await contract.moveCall('module_name', 'test_method', [ store.id ], [ '0xca90beae66f23df1a83036936c5f28fdeaa99f::different_types::Store' ]);
+res.digest;           // Base58-encoded transaction digest
+res.isSuccessful();   // boolean — true if the transaction executed without errors
+res.gasUsed;          // bigint — net gas cost in MIST (computationCost + storageCost − storageRebate)
+res.executedEpoch;    // number — epoch the transaction was finalised in
+res.timestampMs;      // number | null — checkpoint timestamp in ms (only for GraphQL-fetched transactions)
+res.events;           // SuiEvent[] — events emitted (requires include: { events: true })
 ```
 
+##### move method argument types
 
-##### sending sui / coins with smart contract methods
-
-If you need to transfer some SUI/coins as part of executing contract method, you can use a magic parameter in form of:
+`SuiPackage` and `SuiPackageModule` both expose an `arg(type, value)` helper that builds a BCS-serialised Pure input:
 
 ```javascript
-{type: 'SUI', amount: 400000000000n} 
-// 400000000000 MISTs, if amount is BigInt, it's used in decimal items
-{type: 'SUI', amount: '0.2'}         
-// 0.2 SUI           , if amount is String, it's translated to decimals, using coin metadata in a lazy way
-{type: '0x5d4b302506645c37ff133b98c4b50a5ae14841659738d6d733d59d0d217a93bf::coin::COIN', amount: '1.0'}
-// 1 USDC, note it should have a dot even if it's '0' after. You may want to use `Number(var).toFixed(decimals)` as a conversion
-{type: '0xc060006111016b8a020ad5b33834984a437aaa7d3c74c18e09a95d48aceab08c::coin::COIN', amount: '99.99'}
-// 99.99 USDT
+contract.arg('bool', true)
+contract.arg('u8', 222)
+contract.arg('u16', 2222)
+contract.arg('u32', 3333)
+contract.arg('u64', 4444n)
+contract.arg('u128', 5555n)
+contract.arg('u256', 6666n)
+contract.arg('address', '0xd9a95d7cc137f71dd7766f02791536453062a7509e9f461620cc4f583b09134c')
+contract.arg('string', 'some utf-8 💧string')
+contract.arg('vector<u8>', [222, 111, 211]) // also works for other primitive vectors
 ```
 
-So executing
+Take a look at the unit test covering all argument types [here](test/different_types_args.test.js).
+
+##### move methods with type parameters
+
+For Move methods declared as `public entry fun method<T>(...)`, pass type arguments as a third parameter to `module.moveCall` or fourth to `contract.moveCall`:
 
 ```javascript
-const params = [
+await contract.modules.module_name.moveCall(
+    'test_method',
+    [ store.id ],
+    [ '0xca90beae66f23df1a830357c92e0a4348b6164d142c96b06936c5f28fdeaa99f::different_types::Store' ],
+);
+await contract.moveCall(
+    'module_name',
+    'test_method',
+    [ store.id ],
+    [ '0xca90beae66f23df1a830357c92e0a4348b6164d142c96b06936c5f28fdeaa99f::different_types::Store' ],
+);
+```
+
+##### sending SUI / coins with smart contract methods
+
+Pass a coin magic object in place of the coin argument. The amount can be a `BigInt` (raw MIST) or a decimal string (e.g. `'0.2'`):
+
+```javascript
+{ type: 'SUI', amount: 400000000000n }   // 400 SUI in MIST
+{ type: 'SUI', amount: '0.2' }           // 0.2 SUI — converted via coin metadata
+{ type: '0x5d4b302506645c37ff133b98c4b50a5ae14841659738d6d733d59d0d217a93bf::coin::COIN', amount: '1.0' }  // 1 USDC
+```
+
+```javascript
+const moveCallResult = await contract.moveCall('suidouble_chat', 'post_pay', [
     chatShopObjectId,
-    {type: '0xc060006111016b8a020ad5b33834984a437aaa7d3c74c18e09a95d48aceab08c::coin::COIN', amount: '9.99'},
+    { type: 'SUI', amount: 400000000000n },
     contract.arg('string', messageText),
-];
-const moveCallResult = await contract.moveCall('suidouble_chat', 'post_pay', params);
+]);
 ```
 
-will send 9.99 USDT as the second parameter of the package method. Suidouble will convert needed coins using Sui's SplitCoins and MergeCoins internally to match amount you expect to send.
+Coin selection, merging, and splitting are handled by the SDK's `tx.coin({ balance })` intent at build time.
 
-Some smart contracts requires clients to send coins in form of vectors. This is covered too, just pass magic parameter if the form of an array with one element:
+For contracts that require `vector<Coin<T>>`, wrap the magic object in a single-element array:
 
 ```javascript
-const params = [
+await contract.moveCall('suidouble_chat', 'post_pay_with_coin_vector', [
     chatShopObjectId,
-    [{type: '0xc060006111016b8a020ad5b33834984a437aaa7d3c74c18e09a95d48aceab08c::coin::COIN', amount: '9.99'}],
+    [{ type: 'SUI', amount: 400000000000n }],  // vector<Coin<SUI>>
     contract.arg('string', messageText),
-];
+]);
 ```
 
 Don't forget to test transactions sending real money on devnet/testnet first!
 
+##### composing a transaction yourself
 
-##### composing transaction block yourself
-
-If you need more flexebility, there's always an option to construct the transaction yourself:
+For full control, build a `Transaction` manually and execute it via `module.executeTransaction(tx)`. This method signs, submits, and then syncs `objectStorage` and fires module events — just like `moveCall` does internally.
 
 ```javascript
-import { Transaction, txInput } from 'suidouble'; 
+import { Transaction, txInput } from 'suidouble';
 
 const tx = new Transaction();
 tx.moveCall({
-    target: `package_id::module_id::method_name`,
+    target: `${contract.address}::suidouble_chat::post`,
     arguments: [
-        txInput(tx, 'u256', some_value),
-        txInput(tx, 'vector<bool>', some_array),
-        tx.object('0xc060006111016b8a020ad5b33834984a437aaa7d3c74c18e09a95d48aceab08c'), // object ids are ok t
+        tx.object(chatShopObjectId),
+        txInput(tx, 'string', 'hello'),
+        txInput(tx, 'string', 'metadata'),
     ],
 });
-const moveCallResult = await contract.moveCall('suidouble_chat', 'post_pay', {tx: tx});
+
+// high-level: signs + submits + syncs objectStorage + emits events
+const res = await contract.modules.suidouble_chat.executeTransaction(tx);
+console.log('created', res.created.length, 'objects');
+```
+
+If you want only signing and submission without the storage/event sync (e.g. you're building a multi-step PTB and managing state yourself), call the lower-level method directly:
+
+```javascript
+const suiTransaction = await suiMaster.signAndExecuteTransaction({
+    transaction: tx,
+    include: { effects: true, objectTypes: true },
+});
+// objectStorage is NOT updated; module events are NOT emitted
+console.log(suiTransaction.digest);
 ```
 
 
 ##### fetching objects
 
-There's instance of SuiMemoryObjectStorage attached to every SuiMaster instance. Every smart contract method call adds created and mutated objects to it. You can also attach any object with it's address (id).
+`SuiMemoryObjectStorage` is attached to every `SuiMaster` instance. Every `moveCall` automatically pushes created and mutated objects into it.
 
 ```javascript
-contract.modules.modulename.pushObject('0x10cded4f9df05e37b44e3be2ffa9004dec77786950719fad6083694fdca45bf2');
-await contract.modules.modulename.fetchObjects(); // fetch objects fields etc
-const object = contract.modules.modulename.objectStorage.byAddress('0x10cded4f9df05e37b44e3be2ffa9004dec77786950719fad6083694fdca45bf2');
+// find the most recently created ChatTopMessage in local storage:
+const chatTopMessage = suiMaster.objectStorage.findMostRecentByTypeName('ChatTopMessage');
+
+// look up by address:
+const object = suiMaster.objectStorage.byAddress('0x10cded4f9df05e37b44e3be2ffa9004dec77786950719fad6083694fdca45bf2');
 ```
 
-Another option (if you don't know the object id) is to query current wallet owned module's objects from blockchain:
+##### fetching object fields
+
+Objects returned from `moveCall` have their `id`, `version`, and `type` populated but `fields` is empty until you call `fetchFields()`. This fetches content from chain and populates `fields`, `display`, `owner`, etc.
 
 ```javascript
-const module = await contract.getModule('suidouble_chat');
-const paginatedResponse = await module.getOwnedObjects();   // all module objects owned by you
-const paginatedResponse2 = await module.getOwnedObjects({ typeName: 'ChatResponse' });  // specific type objects owned by you
+const result = await contract.moveCall('suidouble_chat', 'post', [...]);
+const chatResponse = result.created.find(o => o.typeName === 'ChatResponse');
 
-await paginatedResponse.forEach(async(suiObject)=>{
-    console.log(suiObject.id, suiObject.typeName, suiObject.fields);
-}, maxLimit); // optional maxLimit, if (!maxLimit) - it will fetch and call callback for all available objects
+await chatResponse.fetchFields();
+console.log(chatResponse.fields.text); // now populated
 ```
 
-@todo: move pushing/fetching to SuiMemoryObjectStorage directly, as there's nothing package or module related?
-@todo: invalidation? No need to re-fetch all objects each time
+##### fetching objects by id
+
+Use `suiMaster.getObject(id)` for a single object or `suiMaster.getObjects(ids)` for a batch. Both return fully-populated `SuiObject` instances. `getObjects` also accepts existing `SuiObject` instances and updates them in-place.
+
+```javascript
+// single fetch:
+const obj = await suiMaster.getObject('0x10cded4f9df05e37b44e3be2ffa9004dec77786950719fad6083694fdca45bf2');
+console.log(obj.typeName, obj.fields);
+
+// batch fetch — accepts ids, SuiObject instances, or a mix:
+const objects = await suiMaster.getObjects([id1, id2, existingSuiObject]);
+for (const o of objects) {
+    console.log(o.id, o.typeName, o.fields);
+}
+```
+
+##### querying owned objects
+
+Use `getOwnedObjects` to query owned objects from the chain, scoped to the whole address, a package, a module, or a specific struct type:
+
+```javascript
+// all objects owned by the connected address:
+const all = await suiMaster.getOwnedObjects({ owner: suiMaster.address, limit: 50 });
+
+// all objects from this package owned by you (uses GraphQL — supports package/module prefixes):
+const pkgObjects = await contract.getOwnedObjects();
+
+// all objects of a specific module owned by you:
+const modObjects = await contract.modules.suidouble_chat.getOwnedObjects();
+
+// objects of a specific struct type (uses gRPC — full struct type required):
+const responses = await contract.modules.suidouble_chat.getOwnedObjects({ typeName: 'ChatResponse' });
+
+// iterate across all pages with forEach:
+await responses.forEach(async (suiObject) => {
+    await suiObject.fetchFields();
+    console.log(suiObject.id, suiObject.fields);
+});
+```
+
+##### fetching transaction history for an object
+
+```javascript
+const txs = await chatTopMessage.fetchTransactions({ limit: 20, order: 'desc' });
+for (const tx of txs.data) {
+    console.log(tx.digest, tx.timestampMs);
+}
+```
+
+##### resolving a Sui Name Service (SuiNS) name
+
+Returns the primary `.sui` name registered for the connected wallet address, or `null` if none. Uses the v2 gRPC client — works on mainnet and testnet.
+
+Each call hits the network, so **cache the result yourself** if you plan to display it repeatedly (e.g. in a UI that re-renders often).
+
+```javascript
+const name = await suiMaster.defaultNameServiceName();
+// e.g. 'adeniyi.sui', or null if no name is registered
+if (name) {
+    console.log('connected as', name);
+}
+```
+
 
 
 ### publishing the package
@@ -325,28 +420,27 @@ Builds a package and publish it to blockchain. CLI thing, as it needs `execSync`
 import { SuiMaster } from 'suidouble'; 
 
 
-const client = 'dev';
-const suiMaster = new SuiMaster({ debug: true, as: 'admin', client: client, });
+const suiMaster = new SuiMaster({ debug: true, as: 'admin', client: 'devnet', });
 
 await suiMaster.requestSuiFromFaucet();
 await suiMaster.getBalance();
 
-const package = suiMaster.addPackage({
+const contract = suiMaster.addPackage({
     path: '../path_to_move_project_root/',
 });
 
-await package.publish();
-console.log('published as', package.address);
+await contract.publish();
+console.log('published as', contract.address);
 ```
 
 Optionally, you can switch sui's env of `sui client switch` for the build (useful for Automated Address Management of dependencies via their Move.lock)
 
 ```javascript
-const package = suiMaster.addPackage({
+const contract = suiMaster.addPackage({
     path: '../path_to_move_project_root/',
 });
-await package.build({ env: 'testnet', });
-await package.publish();
+await contract.build({ env: 'testnet', });
+await contract.publish();
 
 ```
 
@@ -357,20 +451,19 @@ Same, it's for CLI as it re-builds the package.
 ```javascript
 import { SuiMaster } from 'suidouble'; 
 
-const client = 'local';// or await SuiLocalTestValidator.launch({debug: true, epochDuration: 30000});
-
-const suiMaster = new SuiMaster({ debug: true, as: 'admin', client: client, });
+const suiMaster = new SuiMaster({ debug: true, as: 'admin', client: 'localnet', });
+// or: client: await SuiLocalTestValidator.launch({debug: true, epochDuration: 30000})
 await suiMaster.requestSuiFromFaucet();
 await suiMaster.getBalance();
 
-const package = suiMaster.addPackage({
+const contract = suiMaster.addPackage({
     path: '../path_to_move_project_root/',
 });
 
-if (!(await package.isOnChain())) { // suidouble tries to find package with needed modules in UpgradeCaps owned by you
-    await package.publish();
+if (!(await contract.isOnChain())) { // suidouble tries to find package with needed modules in UpgradeCaps owned by you
+    await contract.publish();
 } else {
-    await package.upgrade();
+    await contract.upgrade();
 }
 ```
 
@@ -415,7 +508,7 @@ await testScenario.end();
 
 Check out [suidouble Vue component](https://www.npmjs.com/package/vue-sui) to connect your dapp to the Sui blockchain.
 
-Or write the one manually, code is framework independed:
+Or write it manually — the code is framework-independent:
 
 ```javascript
 import { SuiInBrowser } from 'suidouble'; 
@@ -444,16 +537,14 @@ suiInBrowser.addEventListener('connected', async()=>{
 
     await contract.isOnChain();
 
-    const events = await contract.fetchEvents('chat', {eventTypeName: 'ChatResponseCreated', order: 'descending'});
+    const events = await contract.modules.chat.fetchEvents({eventTypeName: 'ChatResponseCreated', order: 'descending'});
     for (const event of events.data) {
-        // instances of SuiEvent (@todo: write documentation for it)
         console.log('event', event.parsedJson);
     }
 
-    const res = await contract.moveCall('chat', 'post', [contract.arg('string', 'somedata'), contract.arg('vector<u8>', 'somedata') ]);
-    console.log(res);
+    const res = await contract.moveCall('chat', 'post', [contract.arg('string', 'somedata'), contract.arg('vector<u8>', [1, 2, 3]) ]);
     for (const object of res.created) {
-        console.log('created', object.address, 'with type of', object.typeName); // instances of SuiObject (@todo: write documentation for it)
+        console.log('created', object.address, 'with type of', object.typeName);
     }
 });
 

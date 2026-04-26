@@ -11,7 +11,6 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 
-
 test('initialization', async t => {
 	t.plan(2);
 
@@ -121,20 +120,20 @@ test('connecting to different chains', async t => {
     const suiMaster = new SuiMaster({client: 'test', as: 'somebody'});
     await suiMaster.initialize();
 
-    t.equal(suiMaster.connectedChain, 'sui:testnet');
+    t.equal(suiMaster.connectedChain, 'testnet');
 
     const suiMaster2 = new SuiMaster({client: 'dev', as: 'somebody'});
     await suiMaster2.initialize();
 
-    t.equal(suiMaster2.connectedChain, 'sui:devnet');
+    t.equal(suiMaster2.connectedChain, 'devnet');
 
     const suiMaster3 = new SuiMaster({client: 'main', as: 'somebody'});
     await suiMaster3.initialize();
 
-    t.equal(suiMaster3.connectedChain, 'sui:mainnet');
+    t.equal(suiMaster3.connectedChain, 'mainnet');
 
     const suiMaster4 = new SuiMaster({client: 'local', as: 'somebody'});
     await suiMaster4.initialize();
 
-    t.equal(suiMaster4.connectedChain, 'sui:localnet');
+    t.equal(suiMaster4.connectedChain, 'localnet');
 });
