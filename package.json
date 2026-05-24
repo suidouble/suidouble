@@ -1,6 +1,6 @@
 {
   "name": "suidouble",
-  "version": "2.16.0",
+  "version": "2.17.0-3",
   "description": "JavaScript library for Sui Move smart contracts. Publish, upgrade, and test packages; call contract methods; query objects and events — same code works on Node.js and in the browser.",
   "main": "index.js",
   "types": "types/index.d.ts",
@@ -37,7 +37,7 @@
   "license": "Apache-2.0",
   "dependencies": {
     "@mysten/bcs": "^2.0.3",
-    "@mysten/sui": "^2.16.0",
+    "@mysten/sui": "^2.17.0",
     "@polymedia/coinmeta": "^0.0.24",
     "@scure/bip39": "^1.6.0",
     "@wallet-standard/core": "^1.1.1"

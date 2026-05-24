@@ -36,6 +36,10 @@ export default class SuiInBrowserAdapter extends SuiCommonMethods {
     _connectedChain: string | null;
     /** @type {boolean} */
     _isConnected: boolean;
+    /** @type {boolean} */
+    _userDisconnected: boolean;
+    /** @type {?string} */
+    _preferredChain: string | null;
     /**
      * Sign and execute a transaction. Prefers the current `sui:signAndExecuteTransaction`
      * feature; falls back to the legacy `sui:signAndExecuteTransactionBlock` for older wallets.
@@ -77,10 +81,12 @@ export default class SuiInBrowserAdapter extends SuiCommonMethods {
     signMessage(params: any): Promise<any>;
     /**
      * Disconnect from the wallet and refresh connection state.
+     * Force-clears local connection state even if the wallet doesn't support
+     * standard:disconnect or doesn't revoke site authorization (e.g. Phantom).
      * @param {Object} [params]
-     * @returns {Promise<*>}
+     * @returns {Promise<void>}
      */
-    disconnect(params?: any): Promise<any>;
+    disconnect(params?: any): Promise<void>;
     /**
      * Return the Chrome Web Store download URL, or null if not configured.
      * @returns {?string}

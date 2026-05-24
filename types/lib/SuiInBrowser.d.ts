@@ -88,6 +88,21 @@ export default class SuiInBrowser extends SuiCommonMethods {
      * @returns {Promise<*>}
      */
     signAndExecuteTransaction(params: any): Promise<any>;
+    /**
+     * Sign a personal/arbitrary message via the active adapter.
+     * @param {Object} params
+     * @returns {Promise<*>}
+     */
+    signPersonalMessage(params: any): Promise<any>;
+    createBoundSigner(): {
+        readonly activeAdapter: SuiInBrowserAdapter;
+        readonly connectedAddress: string;
+        toSuiAddress(): string;
+        signTransaction(params: any): Promise<import("@mysten/sui/cryptography").SignatureWithBytes>;
+        signAndExecuteTransaction(params: any): Promise<any>;
+        signAndExecuteTransactionBlock(params: any): Promise<any>;
+        signPersonalMessage(params: any): Promise<any>;
+    };
     /** @returns {*} The gRPC client instance, or null if not yet initialised. */
     get client(): any;
     toSuiAddress(): string;
