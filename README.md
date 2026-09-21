@@ -22,7 +22,6 @@ Set of provider, package and object classes for JavaScript representation of Sui
         - [Resolving a Sui Name Service name](#resolving-a-sui-name-service-suins-name)
 - [Publishing the package](#publishing-the-package)
 - [Upgrading the package](#upgrading-the-package)
-- [Writing Sui Move integration tests](#sui-move-integration-testing)
 - [Connecting web3 dApps to Sui](#sui-move-connect-in-browser)
 - [Unit tests](#unit-tests)
 - [Todo](#todo)
@@ -467,43 +466,6 @@ if (!(await contract.isOnChain())) { // suidouble tries to find package with nee
 }
 ```
 
-### Sui Move Integration Testing
-
-CLI integration tests, it runs local testing node (has to be installed), build and deploy a Move package into it and run unit tests over.
-suidouble try to mimic Sui Move's testing framework:
-
-```javascript
-import { SuiTestScenario } from 'suidouble'; 
-
-const testScenario = new SuiTestScenario({
-    path: '../path_to_move_project_root/',
-    debug: true,
-});
-
-await testScenario.begin('admin');
-await testScenario.init();
-
-await testScenario.nextTx('admin', async()=>{
-    const chatShop = testScenario.takeShared('ChatShop');
-    await testScenario.moveCall('chat', 'post', [chatShop.address, testScenario.arg('string', 'posting a message'), testScenario.arg('string', 'metadata') ]);
-    const chatTopMessage = testScenario.takeShared('ChatTopMessage');
-
-    assert(chatTopMessage != null);
-    assert(chatTopMessage.id != null);
-});
-
-await testScenario.nextTx('somebody', async()=>{
-    const chatTopMessage = testScenario.takeShared('ChatTopMessage');
-    await testScenario.moveCall('chat', 'reply', [chatTopMessage.address, testScenario.arg('string', 'posting a response'), testScenario.arg('string', 'metadata') ]);
-    const chatResponse = testScenario.takeFromSender('ChatResponse');
-
-    assert(chatResponse != null);
-    assert(chatResponse.id != null);
-});
-
-await testScenario.end();
-```
-
 ### Sui Move Connect in browser
 
 Check out [suidouble Vue component](https://www.npmjs.com/package/vue-sui) to connect your dapp to the Sui blockchain.
@@ -554,7 +516,7 @@ suiInBrowser.addEventListener('connected', async()=>{
 
 ```bash
 npm install
-npm run tests
+npm test
 ```
 
 Take a look at [unit tests](test) code for some inspiration.

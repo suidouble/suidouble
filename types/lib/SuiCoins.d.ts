@@ -10,13 +10,6 @@
  * @public
  */
 export default class SuiCoins extends SuiCommonMethods {
-    /**
-     * Fetch the mainnet coin metadata bundle from `coinmeta.polymedia.app` and cache the promise so
-     * concurrent callers share a single request. Failures are swallowed and resolve to an empty array.
-     *
-     * @returns {Promise<Array.<CoinMeta>>} list of CoinMeta records, or an empty array on failure
-     */
-    static prefetchMainnetCoinMetas(): Promise<Array<CoinMeta>>;
     static _singleInstances: {};
     /**
      * Return singleton instance of the SuiCoins object for the specific chain
